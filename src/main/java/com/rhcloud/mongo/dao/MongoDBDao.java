@@ -9,7 +9,10 @@ public interface MongoDBDao {
 	public DBObject insert(String collectionName, DBObject dbObject);
 	public DBObject findOne(String collectionName, DBObject query);
 	public void remove(String collectionName, DBObject dbObject);
-	public DBObject update(String collectionName, DBObject criteria, DBObject dbObject);
+	public DBObject update(String collectionName, DBObject dbObject);
 	public DBCursor find(String collectionName);
 	public DBCursor find(String collectionName, DBObject query);
+	
+	public <X> X insert(String collectionName, X clazz);
+	public <X> void remove(String collectionName, X clazz);
 }

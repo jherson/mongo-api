@@ -3,7 +3,18 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.rhcloud.sfa.mongodb</groupId>
 	<artifactId>mongo-api</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
+        <scm>
+                 <url>https://github.com/jherson/sfa-model</url>
+                 <connection>https://github.com/jherson/sfa-model</connection>
+        </scm>
+        <developers>
+                 <developer>
+                          <id>jherson</id>
+                          <name>John Herson</name>
+                          <email>john.d.herson@gmail.com</email>
+                 </developer>
+        </developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
