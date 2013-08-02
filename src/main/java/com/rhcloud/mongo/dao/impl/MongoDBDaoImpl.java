@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.DateTypeAdapter;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -17,7 +18,6 @@ import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
 import com.rhcloud.mongo.dao.MongoDBDao;
-import com.rhcloud.sfa.registration.model.Ticket;
 
 public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
@@ -125,18 +125,31 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	}	
 	
 	@Override
-	public <T> T insert(String collectionName, T clazz) {
+	public <T> T insert(String collectionName, Class<T> clazz) {
 		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = (DBObject) JSON.parse(gson.toJson(clazz));		
+		DBObject dbObject = getAsDBObject(clazz);	
 		WriteResult result = collection.insert(dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
 		}
-		return gson.fromJson(JSON.serialize(dbObject), clazz.getClass());
+		return getAsJson(dbObject, clazz);
 	}
 	
 	@Override
-	public <X> void remove(String collectionName, X clazz) {
-		
+	public <T> void remove(String collectionName, Class<T> clazz) {
+		DBCollection collection = db.getCollection(collectionName);
+		DBObject dbObject = getAsDBObject(clazz);	
+		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
+		if (wr.getError() != null) {
+			throw new MongoException(wr.getLastError());
+		}
+	}
+	
+	private <T> DBObject getAsDBObject(Class<T> clazz) {
+		return (DBObject) JSON.parse(gson.toJson(clazz));
+	}
+	
+	private <T> T getAsJson(DBObject dbObject, Class<T> clazz) {
+		return gson.fromJson(JSON.serialize(dbObject), clazz);
 	}
 }
