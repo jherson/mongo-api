@@ -125,31 +125,42 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	}	
 	
 	@Override
-	public <T> T insert(String collectionName, Class<T> clazz) {
+	public <T> T insert(String collectionName, Object object, Class<T> clazz) {
 		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(clazz);	
+		DBObject dbObject = getAsDBObject(object, clazz);	
 		WriteResult result = collection.insert(dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
 		}
-		return getAsJson(dbObject, clazz);
+		return getAsObject(dbObject, clazz);
 	}
 	
 	@Override
-	public <T> void remove(String collectionName, Class<T> clazz) {
+	public <T> T update(String collectionName, Object object, Class<T> clazz) {
 		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(clazz);	
+		DBObject dbObject = getAsDBObject(object, clazz);
+		WriteResult result = collection.save(dbObject);
+		if (result.getError() != null) {
+			throw new MongoException(result.getLastError());
+		}
+		return getAsObject(dbObject, clazz);
+	}
+	
+	@Override
+	public <T> void remove(String collectionName, Object object, Class<T> clazz) {
+		DBCollection collection = db.getCollection(collectionName);
+		DBObject dbObject = getAsDBObject(object, clazz);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}
 	}
 	
-	private <T> DBObject getAsDBObject(Class<T> clazz) {
-		return (DBObject) JSON.parse(gson.toJson(clazz));
+	private <T> DBObject getAsDBObject(Object object, Class<T> clazz) {
+		return (DBObject) JSON.parse(gson.toJson(object));
 	}
 	
-	private <T> T getAsJson(DBObject dbObject, Class<T> clazz) {
+	private <T> T getAsObject(DBObject dbObject, Class<T> clazz) {
 		return gson.fromJson(JSON.serialize(dbObject), clazz);
 	}
 }

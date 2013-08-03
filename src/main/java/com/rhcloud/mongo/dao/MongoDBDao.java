@@ -13,6 +13,7 @@ public interface MongoDBDao {
 	public DBCursor find(String collectionName);
 	public DBCursor find(String collectionName, DBObject query);
 	
-	public <T> T insert(String collectionName, Class<T> clazz);
-	public <T> void remove(String collectionName, Class<T> clazz);
+	public <T> T insert(String collectionName, Object object, Class<T> clazz);
+	public <T> T update(String collectionName, Object object, Class<T> clazz);
+	public <T> void remove(String collectionName, Object object, Class<T> clazz);
 }
