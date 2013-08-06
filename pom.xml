@@ -4,22 +4,45 @@
 	<groupId>com.rhcloud.sfa.mongodb</groupId>
 	<artifactId>mongo-api</artifactId>
 	<version>0.2.0</version>
-        <scm>
-                 <url>https://github.com/jherson/sfa-model</url>
-                 <connection>https://github.com/jherson/sfa-model</connection>
-        </scm>
-        <developers>
-                 <developer>
-                          <id>jherson</id>
-                          <name>John Herson</name>
-                          <email>john.d.herson@gmail.com</email>
-                 </developer>
-        </developers>
+
+	<url>https://github.com/jherson/mongo-api</url>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<issueManagement>
+		<url>https://github.com/jherson/mongo-api/issues</url>
+		<system>GitHub Issues</system>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>https://github.com/jherson/mongo-api</url>
+		<connection>https://github.com/jherson/mongo-api</connection>
+	</scm>
+	<developers>
+		<developer>
+			<id>jherson</id>
+			<name>John Herson</name>
+			<email>john.d.herson@gmail.com</email>
+		</developer>
+	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -37,16 +60,6 @@
 			<version>4.11</version>
 		</dependency>
 	</dependencies>
-	<distributionManagement>
-		<repository>
-			<id>maven-repo</id>
-			<url>file:///${user.home}/workspace/sfa-mvn-repo</url>
-		</repository>
-		<snapshotRepository>
-			<id>maven-repo</id>
-			<url>file:///${user.home}/workspace/sfa-mvn-repo</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>

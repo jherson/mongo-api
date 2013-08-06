@@ -1,7 +1,27 @@
+/**
+ * 
+ * Copyright 2013 John D. Herson
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.rhcloud.mongo.dao.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 
@@ -53,114 +73,79 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		this.db = db;
 	}
 	
-	/**
-	 * Executes a MongoDB insert of the specified DBObject into the specified collection
-	 * 
-	 * @param collectionName      
-	 * @param dbObject
-	 */
+	@Override
+	public <T> T findOne(Class<T> clazz, String collectionName, DBObject query) {
+		DBCollection collection = db.getCollection(collectionName);	
+		DBObject dbObject = collection.findOne(query);
+		return getAsObject(clazz, dbObject);
+	}
 	
 	@Override
-	public DBObject insert(String collectionName, DBObject dbObject) {        	
+	public <T> T insert(Class<T> clazz, String collectionName, Object object) {
 		DBCollection collection = db.getCollection(collectionName);
+		DBObject dbObject = getAsDBObject(clazz, object);	
 		WriteResult result = collection.insert(dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
 		}
-		return dbObject;
+		return getAsObject(clazz, dbObject);
 	}
 	
 	@Override
-	public DBObject findOne(String collectionName, DBObject query) {
-		DBCollection collection = db.getCollection(collectionName);	
-		return collection.findOne(query);
-	}
-	
-	@Override
-	public DBCursor find(String collectionName) {
-		DBCollection collection = db.getCollection(collectionName);		
-		DBCursor cursor = collection.find();
-		return cursor;
-	}
-	
-	@Override
-	public DBCursor find(String collectionName, DBObject query) {
-		DBCollection collection = db.getCollection(collectionName);	
-		DBCursor cursor = collection.find(query);
-		return cursor;
-	}
-	
-	/**
-	 * Executes a MongoDB remove of the specified DBObject from the specified collection
-	 * 
-	 * @param collectionName
-	 * @param dbObject 
-	 */
-	
-	@Override
-	public void remove(String collectionName, DBObject dbObject) {
+	public <T> T update(Class<T> clazz, String collectionName, Object object) {
 		DBCollection collection = db.getCollection(collectionName);
-		WriteResult result = collection.remove(dbObject);
-		if (result.getError() != null) {
-			throw new MongoException(result.getLastError());
-		}
-	}
-	
-	/**
-	 * Executes a MongoDB update of of the specified DBObject into the specified collection
-	 * 
-	 * @param collectionName
-	 * @param criteria
-	 * @param dbObject
-	 */
-	
-	@Override
-	public DBObject update(String collectionName, DBObject dbObject) {
-		DBCollection collection = db.getCollection(collectionName);
+		DBObject dbObject = getAsDBObject(clazz, object);
 		WriteResult result = collection.save(dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
 		}
-		return dbObject;
-	}	
-	
-	@Override
-	public <T> T insert(String collectionName, Object object, Class<T> clazz) {
-		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(object, clazz);	
-		WriteResult result = collection.insert(dbObject);
-		if (result.getError() != null) {
-			throw new MongoException(result.getLastError());
-		}
-		return getAsObject(dbObject, clazz);
+		return getAsObject(clazz, dbObject);
 	}
 	
 	@Override
-	public <T> T update(String collectionName, Object object, Class<T> clazz) {
+	public <T> T find(Class<T> clazz, String collectionName, ObjectId id) {
 		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(object, clazz);
-		WriteResult result = collection.save(dbObject);
-		if (result.getError() != null) {
-			throw new MongoException(result.getLastError());
-		}
-		return getAsObject(dbObject, clazz);
+		DBObject dbObject = collection.findOne(new BasicDBObject("_id", id));
+		return getAsObject(clazz, dbObject);
 	}
 	
 	@Override
-	public <T> void remove(String collectionName, Object object, Class<T> clazz) {
+	public <T> void delete(Class<T> clazz, String collectionName, Object object) {
 		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(object, clazz);	
+		DBObject dbObject = getAsDBObject(clazz, object);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}
 	}
 	
-	private <T> DBObject getAsDBObject(Object object, Class<T> clazz) {
+	@Override
+	public <T> List<T> find(Class<T> clazz, String collectionName, DBObject query) {
+		DBCollection collection = db.getCollection(collectionName);
+		DBCursor cursor = collection.find(query);
+		List<T> queryResult = new ArrayList<T>();
+		while (cursor.hasNext()) {
+			queryResult.add(getAsObject(clazz, cursor.next()));
+		}
+		return queryResult;
+	}
+	
+	@Override
+	public <T> List<T> find(Class<T> clazz, String collectionName) {
+		DBCollection collection = db.getCollection(collectionName);
+		DBCursor cursor = collection.find();
+		List<T> queryResult = new ArrayList<T>();
+		while (cursor.hasNext()) {
+			queryResult.add(getAsObject(clazz, cursor.next()));
+		}
+		return queryResult;
+	}
+	
+	private <T> DBObject getAsDBObject(Class<T> clazz, Object object) {
 		return (DBObject) JSON.parse(gson.toJson(object));
 	}
 	
-	private <T> T getAsObject(DBObject dbObject, Class<T> clazz) {
-		return gson.fromJson(JSON.serialize(dbObject), clazz);
+	private <T> T getAsObject(Class<T> clazz, Object object) {
+		return gson.fromJson(JSON.serialize(object), clazz);
 	}
 }

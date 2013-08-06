@@ -2,11 +2,12 @@ package com.rhcloud.mongo.test;
 
 import java.net.UnknownHostException;
 
+import org.bson.types.ObjectId;
+import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
@@ -17,53 +18,66 @@ import com.rhcloud.mongo.test.model.MongoTestObject;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertEquals;
 
 public class MongoApiTest {
-
+	
 	private static final String host = "ds037468.mongolab.com";
 	private static final String port = "37468";
 	private static final String database = "apitest"; 
 	private static final String username = "test";
 	private static final String password = "test";
 	
-
-	@Test
-	public void testInsert() {
-		MongoClient mongo = null;
+	private static MongoClient mongo;
+	private static DB db;
+	private static MongoDBDao mongoDBDao;
+	
+	@Before
+	public void initDB() {
+		mongo = null;
 		try {
 			mongo = new MongoClient(new ServerAddress(host, Integer.decode(port)));
 		} catch (NumberFormatException | UnknownHostException e) {
 			e.printStackTrace();
 		}
 		
-		DB db = mongo.getDB(database);
+		db = mongo.getDB(database);
 		
 		if (!db.authenticate(username, password.toCharArray())) {
 			throw new MongoException(String.format("Failed to authenticate against db: %s", db));
 		}
 		
-		MongoDBDao mongoDBDao = new MongoDBDaoImpl();
+		mongoDBDao = new MongoDBDaoImpl();
 		mongoDBDao.setDB(db);
+	}
+	
+	@After
+	public void closeDB() {
+		mongo.close();
+	}
+
+	@Test
+	public void testInsert() {		
 		
 		MongoTestObject testObject = new MongoTestObject();
 		testObject.setName("Mongo Test Object");
 		
-		testObject = mongoDBDao.insert("TestObjects", testObject, MongoTestObject.class);
+		testObject = mongoDBDao.insert(MongoTestObject.class, "TestObjects", testObject);
 		
 		System.out.println("Id: " + testObject.getId());
-					
+						
 		assertNotNull(testObject.getId());
 		
-		testObject.setName("Name change");
-		testObject = mongoDBDao.update("TestObjects", testObject, MongoTestObject.class);
+        testObject = mongoDBDao.update(MongoTestObject.class, "TestObjects", testObject);
 		
+		assertEquals(testObject.getName(), findById(testObject.getId()).getName());
 		
-		
-		//mongoDBDao.remove("TestObjects", testObject, MongoTestObject.class);
-		
-		//DBObject dbObject = mongoDBDao.findOne("TestObjects", new BasicDBObject("_id", testObject.getId()));
-		
-		//assertNull(dbObject);
+        mongoDBDao.delete(MongoTestObject.class, "TestObjects", testObject);
+				
+		assertNull(findById(testObject.getId()));
+	}
+	
+	private MongoTestObject findById(ObjectId id) {
+		return mongoDBDao.find(MongoTestObject.class, "TestObjects", id);
 	}
 }
