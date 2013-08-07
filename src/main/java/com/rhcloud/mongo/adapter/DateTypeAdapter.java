@@ -32,10 +32,23 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+/**
+ * @author jherson
+ *
+ */
+
 public class DateTypeAdapter implements JsonSerializer<Date>, JsonDeserializer<Date> {
 
 	private static final String ISO_8061_FORMAT = "yyyy-MM-dd'T'kk:mm:ss.SSS'Z'";
 
+	/**
+	 *  deserialize a JsonElement into a java.util.Date. Used by GsonBuilder
+	 *  
+	 *  @param jsonElement to be deserialized
+	 *  @param type
+	 *  @param context
+	 */
+	
 	@Override
 	public Date deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {				
 		SimpleDateFormat format = new SimpleDateFormat(ISO_8061_FORMAT);
@@ -47,6 +60,14 @@ public class DateTypeAdapter implements JsonSerializer<Date>, JsonDeserializer<D
 		}
 	}
 
+	/**
+	 * serialize a java.util.Date into JsonElement. Used by GsonBuilder
+	 * 
+	 * @param date to be serialized
+	 * @param type
+	 * @param context
+	 */
+	
 	@Override
 	public JsonElement serialize(Date date, Type type, JsonSerializationContext context) {
 		SimpleDateFormat format = new SimpleDateFormat(ISO_8061_FORMAT);

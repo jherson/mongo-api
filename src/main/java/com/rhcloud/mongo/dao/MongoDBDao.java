@@ -26,6 +26,10 @@ import org.bson.types.ObjectId;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 
+/**
+ * @author jherson
+ *
+ */
 public interface MongoDBDao {
 	
 	

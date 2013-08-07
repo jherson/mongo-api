@@ -30,8 +30,22 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
+/**
+ * 
+ * @author jherson
+ *
+ */
+
 public class ObjectIdTypeAdapter implements JsonSerializer<ObjectId>, JsonDeserializer<ObjectId> {
 
+	/**
+	 *  deserialize a JsonElement into a org.bson.types.ObjectId. Used by GsonBuilder
+	 *  
+	 *  @param jsonElement to be deserialized
+	 *  @param type
+	 *  @param context
+	 */
+	
 	@Override
 	public ObjectId deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
 		if (jsonElement.isJsonNull())
@@ -39,6 +53,14 @@ public class ObjectIdTypeAdapter implements JsonSerializer<ObjectId>, JsonDeseri
 
 		return new ObjectId(jsonElement.getAsJsonObject().get("$oid").getAsString());
 	}
+	
+	/**
+	 * serialize a org.bson.types.ObjectId into JsonElement. Used by GsonBuilder
+	 * 
+	 * @param objectId to be serialized
+	 * @param type
+	 * @param context
+	 */
 	
 	@Override
 	public JsonElement serialize(ObjectId objectId, Type type, JsonSerializationContext context) {

@@ -39,6 +39,10 @@ import com.mongodb.util.JSON;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
 import com.rhcloud.mongo.dao.MongoDBDao;
 
+/**
+ * @author jherson
+ *
+ */
 public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	/**
@@ -73,12 +77,30 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		this.db = db;
 	}
 	
+	/**
+	 * finds one document matching the query
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @param query
+	 * @return the object that matches the query
+	 */
+	
 	@Override
 	public <T> T findOne(Class<T> clazz, String collectionName, DBObject query) {
 		DBCollection collection = db.getCollection(collectionName);	
 		DBObject dbObject = collection.findOne(query);
 		return getAsObject(clazz, dbObject);
 	}
+	
+	/**
+	 * inserts an object into a collection
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @param object to be inserted
+	 * @return the inserted object
+	 */
 	
 	@Override
 	public <T> T insert(Class<T> clazz, String collectionName, Object object) {
@@ -91,6 +113,15 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		return getAsObject(clazz, dbObject);
 	}
 	
+	/**
+	 * updates the object in the collection
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @param object to be updated
+	 * @return the updated object
+	 */
+	
 	@Override
 	public <T> T update(Class<T> clazz, String collectionName, Object object) {
 		DBCollection collection = db.getCollection(collectionName);
@@ -102,12 +133,29 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		return getAsObject(clazz, dbObject);
 	}
 	
+	/**
+	 * find a document in a collection using the objectId
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @param id the ObjectId of the object to query
+	 * @return object found based on objectId
+	 */
+	
 	@Override
 	public <T> T find(Class<T> clazz, String collectionName, ObjectId id) {
 		DBCollection collection = db.getCollection(collectionName);
 		DBObject dbObject = collection.findOne(new BasicDBObject("_id", id));
 		return getAsObject(clazz, dbObject);
 	}
+	
+	/**
+	 * delete a document from a collection
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @param object to delete
+	 */
 	
 	@Override
 	public <T> void delete(Class<T> clazz, String collectionName, Object object) {
@@ -119,6 +167,15 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		}
 	}
 	
+	/**
+	 * find a list of objects the match the query
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @param query to be executed
+	 * @return query result
+	 */
+	
 	@Override
 	public <T> List<T> find(Class<T> clazz, String collectionName, DBObject query) {
 		DBCollection collection = db.getCollection(collectionName);
@@ -129,6 +186,14 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		}
 		return queryResult;
 	}
+	
+	/**
+	 * find all documents in a collection
+	 * 
+	 * @param clazz
+	 * @param collectionName
+	 * @return the query result
+	 */
 	
 	@Override
 	public <T> List<T> find(Class<T> clazz, String collectionName) {

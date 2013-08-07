@@ -28,6 +28,12 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
 
+/**
+ * 
+ * @author jherson
+ *
+ */
+
 public abstract class MongoDBBaseEntity implements Serializable {
 
 	/**
@@ -53,21 +59,45 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	@SerializedName("_id")
 	private ObjectId _id;
 	
+	/**
+	 * constructor
+	 */
+	
 	public MongoDBBaseEntity() {
 		
 	}
+	
+	/**
+	 * constructor
+	 * @param json
+	 */
 	
 	public MongoDBBaseEntity(String json) {
 		gson.fromJson(json, this.getClass());
 	}
 	
+	/**
+	 * get id of the object
+	 * @return ObjectId
+	 */
+	
 	public ObjectId getId() {
 		return _id;
 	}
 
+	/**
+	 * setId
+	 * @param id
+	 */
+	
 	public void setId(ObjectId id) {
 		this._id = id;
 	}
+	
+	/**
+	 * get the object as JSON
+	 * @return json String
+	 */
 	
 	public String getAsJSON() {
 		return gson.toJson(this);
