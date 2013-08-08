@@ -19,9 +19,7 @@
 package com.rhcloud.mongo.dao.impl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.bson.types.ObjectId;
 
@@ -31,11 +29,13 @@ import com.google.gson.internal.bind.DateTypeAdapter;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
+import com.rhcloud.mongo.AnnotationScanner;
+import com.rhcloud.mongo.Query;
+import com.rhcloud.mongo.QueryImpl;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
 import com.rhcloud.mongo.dao.MongoDBDao;
 
@@ -78,22 +78,6 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	}
 	
 	/**
-	 * finds one document matching the query
-	 * 
-	 * @param clazz
-	 * @param collectionName
-	 * @param query
-	 * @return the object that matches the query
-	 */
-	
-	@Override
-	public <T> T findOne(Class<T> clazz, String collectionName, DBObject query) {
-		DBCollection collection = db.getCollection(collectionName);	
-		DBObject dbObject = collection.findOne(query);
-		return getAsObject(clazz, dbObject);
-	}
-	
-	/**
 	 * inserts an object into a collection
 	 * 
 	 * @param clazz
@@ -103,7 +87,8 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	 */
 	
 	@Override
-	public <T> T insert(Class<T> clazz, String collectionName, Object object) {
+	public <T> T insert(Class<T> clazz, Object object) {
+		String collectionName = AnnotationScanner.getCollectionName(clazz);		
 		DBCollection collection = db.getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);	
 		WriteResult result = collection.insert(dbObject);
@@ -123,7 +108,8 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	 */
 	
 	@Override
-	public <T> T update(Class<T> clazz, String collectionName, Object object) {
+	public <T> T update(Class<T> clazz, Object object) {
+		String collectionName = AnnotationScanner.getCollectionName(clazz);
 		DBCollection collection = db.getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);
 		WriteResult result = collection.save(dbObject);
@@ -143,10 +129,13 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	 */
 	
 	@Override
-	public <T> T find(Class<T> clazz, String collectionName, ObjectId id) {
-		DBCollection collection = db.getCollection(collectionName);
-		DBObject dbObject = collection.findOne(new BasicDBObject("_id", id));
-		return getAsObject(clazz, dbObject);
+	public <T> T find(Class<T> clazz, ObjectId id) {
+		String collectionName = AnnotationScanner.getCollectionName(clazz);
+		return createQuery()
+				.setCollectionName(collectionName)
+				.put("_id")
+				.is(id)
+				.getSingleResult(clazz);
 	}
 	
 	/**
@@ -158,7 +147,8 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	 */
 	
 	@Override
-	public <T> void delete(Class<T> clazz, String collectionName, Object object) {
+	public <T> void delete(Class<T> clazz, Object object) {		
+		String collectionName = AnnotationScanner.getCollectionName(clazz);
 		DBCollection collection = db.getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
@@ -167,43 +157,9 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 		}
 	}
 	
-	/**
-	 * find a list of objects the match the query
-	 * 
-	 * @param clazz
-	 * @param collectionName
-	 * @param query to be executed
-	 * @return query result
-	 */
-	
 	@Override
-	public <T> List<T> find(Class<T> clazz, String collectionName, DBObject query) {
-		DBCollection collection = db.getCollection(collectionName);
-		DBCursor cursor = collection.find(query);
-		List<T> queryResult = new ArrayList<T>();
-		while (cursor.hasNext()) {
-			queryResult.add(getAsObject(clazz, cursor.next()));
-		}
-		return queryResult;
-	}
-	
-	/**
-	 * find all documents in a collection
-	 * 
-	 * @param clazz
-	 * @param collectionName
-	 * @return the query result
-	 */
-	
-	@Override
-	public <T> List<T> find(Class<T> clazz, String collectionName) {
-		DBCollection collection = db.getCollection(collectionName);
-		DBCursor cursor = collection.find();
-		List<T> queryResult = new ArrayList<T>();
-		while (cursor.hasNext()) {
-			queryResult.add(getAsObject(clazz, cursor.next()));
-		}
-		return queryResult;
+	public Query createQuery() {
+		return new QueryImpl(db, gson);
 	}
 	
 	private <T> DBObject getAsDBObject(Class<T> clazz, Object object) {

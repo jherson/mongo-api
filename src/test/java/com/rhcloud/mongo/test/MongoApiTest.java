@@ -1,6 +1,7 @@
 package com.rhcloud.mongo.test;
 
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.junit.Before;
@@ -19,6 +20,7 @@ import com.rhcloud.mongo.test.model.MongoTestObject;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class MongoApiTest {
 	
@@ -62,22 +64,26 @@ public class MongoApiTest {
 		MongoTestObject testObject = new MongoTestObject();
 		testObject.setName("Mongo Test Object");
 		
-		testObject = mongoDBDao.insert(MongoTestObject.class, "TestObjects", testObject);
+		testObject = mongoDBDao.insert(MongoTestObject.class, testObject);
 		
 		System.out.println("Id: " + testObject.getId());
 						
 		assertNotNull(testObject.getId());
 		
-        testObject = mongoDBDao.update(MongoTestObject.class, "TestObjects", testObject);
+		List<MongoTestObject> testObjectList = mongoDBDao.createQuery().setCollectionName("TestObjects").getResultList(MongoTestObject.class);
+		
+		assertNotEquals(testObjectList.size(), 0);
+		
+        testObject = mongoDBDao.update(MongoTestObject.class, testObject);
 		
 		assertEquals(testObject.getName(), findById(testObject.getId()).getName());
 		
-        mongoDBDao.delete(MongoTestObject.class, "TestObjects", testObject);
+        mongoDBDao.delete(MongoTestObject.class, testObject);
 				
 		assertNull(findById(testObject.getId()));
 	}
 	
 	private MongoTestObject findById(ObjectId id) {
-		return mongoDBDao.find(MongoTestObject.class, "TestObjects", id);
+		return mongoDBDao.find(MongoTestObject.class, id);
 	}
 }
