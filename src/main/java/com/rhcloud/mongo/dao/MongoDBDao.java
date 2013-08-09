@@ -30,12 +30,53 @@ import com.rhcloud.mongo.Query;
  */
 public interface MongoDBDao {
 	
+	/**
+	 * 
+	 * @param db
+	 */
 	
 	public void setDB(DB db);
+	
+	/**
+	 * insert
+	 * @param clazz
+	 * @param object
+	 * @return T
+	 */
+	
 	public <T> T insert(Class<T> clazz, Object object);
+	
+	/**
+	 * 
+	 * @param clazz
+	 * @param object
+	 * @return 
+	 */
+	
 	public <T> T update(Class<T> clazz, Object object);
+	
+	/**
+	 * delete
+	 * @param clazz
+	 * @param object
+	 * @return void
+	 */
+	
 	public <T> void delete(Class<T> clazz, Object object);
+	
+	/**
+	 * find
+	 * @param clazz
+	 * @param id
+	 * @return T
+	 */
+	
 	public <T> T find(Class<T> clazz, ObjectId id);	
+	
+	/**
+	 * createQuery
+	 * @return Query
+	 */
 	
 	public Query createQuery();
 }

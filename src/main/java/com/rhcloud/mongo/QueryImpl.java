@@ -10,6 +10,10 @@ import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
 import com.mongodb.util.JSON;
 
+/**
+ * @author jherson
+ *
+ */
 public class QueryImpl implements Query {
 	
 	/**
@@ -36,11 +40,25 @@ public class QueryImpl implements Query {
 	
 	protected String collectionName;
 	
+	/**
+	 * constructor
+	 * 
+	 * @param db
+	 * @param gson
+	 */
+	
 	public QueryImpl(DB db, Gson gson) {
 		this.db = db;
 		this.gson = gson;
 		this.queryBuilder = QueryBuilder.start();
 	}
+	
+	/**
+	 * setCollectionName
+	 * 
+	 * @param the MongoDB Collection to add the document
+	 * @return query object
+	 */
 	
 	@Override
 	public Query setCollectionName(String collectionName) {
@@ -48,10 +66,23 @@ public class QueryImpl implements Query {
 		return this;
 	}
 	
+	/**
+	 * getCollectionName
+	 * 
+	 * @return collectionName that this document is part of
+	 */
+	
 	@Override
 	public String getCollectionName() {
 		return collectionName;
 	}
+	
+	/**
+	 * put
+	 * 
+	 * @param key 
+	 * @return query object
+	 */
 	
 	@Override
 	public Query put(String key) {
@@ -59,11 +90,25 @@ public class QueryImpl implements Query {
 		return this;
 	}
 	
+	/**
+	 * is
+	 * 
+	 * @param value
+	 * @return query object 
+	 */
+	
 	@Override
 	public Query is(Object value) {
 		queryBuilder.is(value);
 		return this;
 	}
+	
+	/**
+	 * getSingleResult
+	 * 
+	 * @param clazz
+	 * @return single document that matched the search criteria
+	 */
 	
 	@Override
 	public <T> T getSingleResult(Class<T> clazz) {
@@ -71,7 +116,14 @@ public class QueryImpl implements Query {
 		return getAsObject(clazz, collection.findOne(queryBuilder.get()));
 
 	}
-		
+	
+	/**
+	 * getResultList
+	 * 
+	 * @param clazz
+	 * @return list of documents that matched the search criteria
+	 */
+	
 	@Override
 	public <T> List<T> getResultList(Class<T> clazz) {
 		List<T> queryResult = new ArrayList<T>();

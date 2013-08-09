@@ -6,6 +6,13 @@ import com.rhcloud.mongo.annotation.Document;
 
 public class AnnotationScanner {
 
+	/**
+	 * getCollectionName
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	
 	public static <T> String getCollectionName(Class<T> clazz) {		
 		Annotation annotation = clazz.getAnnotation(Document.class);
 		if (annotation == null) {

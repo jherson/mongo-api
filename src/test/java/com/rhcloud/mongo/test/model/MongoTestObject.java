@@ -5,7 +5,6 @@ import org.bson.types.ObjectId;
 import com.rhcloud.mongo.annotation.Document;
 
 @Document(collectionName="TestObjects")
-
 public class MongoTestObject {
 	
 	private ObjectId _id;
