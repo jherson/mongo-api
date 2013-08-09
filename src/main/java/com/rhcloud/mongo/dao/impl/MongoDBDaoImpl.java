@@ -69,7 +69,6 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 
 	/**
 	 * sets the MongoDB for use in this DAO
-	 * 
 	 * @param db 
 	 */
 
@@ -79,11 +78,9 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	/**
 	 * inserts an object into a collection
-	 * 
 	 * @param clazz
-	 * @param collectionName
 	 * @param object to be inserted
-	 * @return the inserted object
+	 * @return T
 	 */
 	
 	@Override
@@ -100,9 +97,7 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	/**
 	 * updates the object in the collection
-	 * 
 	 * @param clazz
-	 * @param collectionName
 	 * @param object to be updated
 	 * @return the updated object
 	 */
@@ -121,9 +116,7 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	/**
 	 * find a document in a collection using the objectId
-	 * 
 	 * @param clazz
-	 * @param collectionName
 	 * @param id the ObjectId of the object to query
 	 * @return object found based on objectId
 	 */
@@ -140,9 +133,7 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	/**
 	 * delete a document from a collection
-	 * 
 	 * @param clazz
-	 * @param collectionName
 	 * @param object to delete
 	 */
 	
@@ -156,6 +147,11 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 			throw new MongoException(wr.getLastError());
 		}
 	}
+	
+	/**
+	 * createQuery
+	 * @return Query
+	 */
 	
 	@Override
 	public Query createQuery() {

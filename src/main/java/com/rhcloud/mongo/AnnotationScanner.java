@@ -10,7 +10,7 @@ public class AnnotationScanner {
 	 * getCollectionName
 	 * 
 	 * @param clazz
-	 * @return
+	 * @return T
 	 */
 	
 	public static <T> String getCollectionName(Class<T> clazz) {		

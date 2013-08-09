@@ -50,7 +50,7 @@ public interface MongoDBDao {
 	 * 
 	 * @param clazz
 	 * @param object
-	 * @return 
+	 * @return T
 	 */
 	
 	public <T> T update(Class<T> clazz, Object object);
@@ -59,7 +59,6 @@ public interface MongoDBDao {
 	 * delete
 	 * @param clazz
 	 * @param object
-	 * @return void
 	 */
 	
 	public <T> void delete(Class<T> clazz, Object object);

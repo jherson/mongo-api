@@ -56,7 +56,7 @@ public class QueryImpl implements Query {
 	/**
 	 * setCollectionName
 	 * 
-	 * @param the MongoDB Collection to add the document
+	 * @param collectionName that the document will be added to
 	 * @return query object
 	 */
 	

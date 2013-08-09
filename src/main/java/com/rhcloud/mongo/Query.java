@@ -34,7 +34,7 @@ public interface Query {
 	 * is
 	 * 
 	 * @param value
-	 * @return
+	 * @return Query
 	 */
 	
 	public Query is(Object value);
