@@ -70,7 +70,7 @@ public class MongoApiTest {
 						
 		assertNotNull(testObject.getId());
 		
-		List<MongoTestObject> testObjectList = mongoDBDao.createQuery().setCollectionName("TestObjects").getResultList(MongoTestObject.class);
+		List<MongoTestObject> testObjectList = mongoDBDao.createQuery(MongoTestObject.class).getResultList();
 		
 		assertNotEquals(testObjectList.size(), 0);
 		

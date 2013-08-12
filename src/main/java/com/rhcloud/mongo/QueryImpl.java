@@ -12,15 +12,29 @@ import com.mongodb.util.JSON;
 
 /**
  * @author jherson
+ * @param <T>
+ * @param <T>
  *
  */
-public class QueryImpl implements Query {
+public class QueryImpl<T> implements Query<T> {
 	
 	/**
 	 * 
 	 */
 	
 	protected DB db;	
+	
+	/**
+	 * 
+	 */
+	
+	protected Class<T> clazz;
+	
+	/**
+	 * 
+	 */
+	
+	protected DBCollection collection;
 	
 	/**
 	 * 
@@ -47,45 +61,23 @@ public class QueryImpl implements Query {
 	 * @param gson
 	 */
 	
-	public QueryImpl(DB db, Gson gson) {
+	public QueryImpl(Class<T> clazz, DB db, Gson gson) {
 		this.db = db;
-		this.gson = gson;
+		this.clazz = clazz;		
+		this.gson = gson;			
+		this.collection = db.getCollection(AnnotationScanner.getCollectionName(clazz));
 		this.queryBuilder = QueryBuilder.start();
-	}
-	
-	/**
-	 * setCollectionName
-	 * 
-	 * @param collectionName that the document will be added to
-	 * @return query object
-	 */
-	
-	@Override
-	public Query setCollectionName(String collectionName) {
-		this.collectionName = collectionName;
-		return this;
-	}
-	
-	/**
-	 * getCollectionName
-	 * 
-	 * @return collectionName that this document is part of
-	 */
-	
-	@Override
-	public String getCollectionName() {
-		return collectionName;
 	}
 	
 	/**
 	 * put
 	 * 
 	 * @param key 
-	 * @return query object
+	 * @return Query object
 	 */
 	
 	@Override
-	public Query put(String key) {
+	public Query<T> put(String key) {
 		queryBuilder.put(key);
 		return this;
 	}
@@ -98,7 +90,7 @@ public class QueryImpl implements Query {
 	 */
 	
 	@Override
-	public Query is(Object value) {
+	public Query<T> is(Object value) {
 		queryBuilder.is(value);
 		return this;
 	}
@@ -109,12 +101,10 @@ public class QueryImpl implements Query {
 	 * @param clazz
 	 * @return single document that matched the search criteria
 	 */
-	
+		
 	@Override
-	public <T> T getSingleResult(Class<T> clazz) {
-		DBCollection collection = db.getCollection(getCollectionName());
+	public T getSingleResult() {
 		return getAsObject(clazz, collection.findOne(queryBuilder.get()));
-
 	}
 	
 	/**
@@ -125,19 +115,17 @@ public class QueryImpl implements Query {
 	 */
 	
 	@Override
-	public <T> List<T> getResultList(Class<T> clazz) {
+	public List<T> getResultList() {			
+		DBCursor cursor = collection.find(queryBuilder.get());
+		
 		List<T> queryResult = new ArrayList<T>();
-		
-		DBCollection collection = db.getCollection(getCollectionName());
-		
-		DBCursor cursor = collection.find(queryBuilder.get());			
 		while (cursor.hasNext()) {
 			queryResult.add(getAsObject(clazz, cursor.next()));
 		}
 		return queryResult;
-	}	
-	
-	private <T> T getAsObject(Class<T> clazz, Object object) {
+	}
+		
+	private T getAsObject(Class<T> clazz, Object object) {
 		return gson.fromJson(JSON.serialize(object), clazz);
 	}
 }

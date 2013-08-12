@@ -2,24 +2,7 @@ package com.rhcloud.mongo;
 
 import java.util.List;
 
-public interface Query {
-
-	/**
-	 * setCollectionName
-	 * 
-	 * @param collectionName
-	 * @return Query
-	 */
-	
-	public Query setCollectionName(String collectionName);
-	
-	/**
-	 * getCollectionName
-	 * 
-	 * @return String
-	 */
-	
-	public String getCollectionName();
+public interface Query<T> {
 	
 	/**
 	 * put
@@ -28,7 +11,7 @@ public interface Query {
 	 * @return Query
 	 */
 	
-	public Query put(String key);
+	public Query<T> put(String key);
 	
 	/**
 	 * is
@@ -37,7 +20,7 @@ public interface Query {
 	 * @return Query
 	 */
 	
-	public Query is(Object value);
+	public Query<T> is(Object value);
 	
 	/**
 	 * getSingleResult
@@ -46,7 +29,7 @@ public interface Query {
 	 * @return T
 	 */
 	
-	public <T> T getSingleResult(Class<T> clazz);
+	public T getSingleResult();
 	
 	/**
 	 * 
@@ -54,5 +37,5 @@ public interface Query {
 	 * @return List<T>
 	 */
 	
-	public <T> List<T> getResultList(Class<T> clazz);
+	public List<T> getResultList();
 }

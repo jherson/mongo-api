@@ -116,19 +116,19 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	/**
 	 * find a document in a collection using the objectId
+	 * @param <T>
 	 * @param clazz
 	 * @param id the ObjectId of the object to query
 	 * @return object found based on objectId
 	 */
 	
+	@SuppressWarnings({ "unchecked" })
 	@Override
-	public <T> T find(Class<T> clazz, ObjectId id) {
-		String collectionName = AnnotationScanner.getCollectionName(clazz);
-		return createQuery()
-				.setCollectionName(collectionName)
+	public  <T> T find(Class<T> clazz, ObjectId id) {
+		return (T) createQuery(clazz)
 				.put("_id")
 				.is(id)
-				.getSingleResult(clazz);
+				.getSingleResult();
 	}
 	
 	/**
@@ -153,9 +153,10 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	 * @return Query
 	 */
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public Query createQuery() {
-		return new QueryImpl(db, gson);
+	public <T> Query createQuery(Class<T> clazz) {		
+		return new QueryImpl(clazz, db, gson);
 	}
 	
 	private <T> DBObject getAsDBObject(Class<T> clazz, Object object) {

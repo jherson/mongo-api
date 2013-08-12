@@ -47,6 +47,7 @@ public interface MongoDBDao {
 	public <T> T insert(Class<T> clazz, Object object);
 	
 	/**
+	 * update
 	 * 
 	 * @param clazz
 	 * @param object
@@ -57,6 +58,7 @@ public interface MongoDBDao {
 	
 	/**
 	 * delete
+	 * 
 	 * @param clazz
 	 * @param object
 	 */
@@ -65,6 +67,7 @@ public interface MongoDBDao {
 	
 	/**
 	 * find
+	 * 
 	 * @param clazz
 	 * @param id
 	 * @return T
@@ -74,8 +77,10 @@ public interface MongoDBDao {
 	
 	/**
 	 * createQuery
+	 * 
+	 * @param clazz
 	 * @return Query
 	 */
 	
-	public Query createQuery();
+	public <T> Query<T> createQuery(Class<T> clazz);
 }
