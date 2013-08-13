@@ -50,7 +50,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected MongoDBDatastoreImpl mongoDBDao;
+	protected MongoDBDatastore mongoDBDao;
 	
 	/**
 	 * constructor
@@ -59,7 +59,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * @param clazz
 	 */
 	
-	protected QueryImpl(MongoDBDatastoreImpl mongoDBDao, Class<T> clazz) {
+	protected QueryImpl(MongoDBDatastore mongoDBDao, Class<T> clazz) {
 		this.mongoDBDao = mongoDBDao;
 		this.db = mongoDBDao.getDB();
 		this.clazz = clazz;					

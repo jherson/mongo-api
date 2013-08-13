@@ -7,9 +7,9 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
 
-public class MongoDBDatastoreFactory {
+public class DatastoreFactory {
 	
-	public static MongoDBDatastore connect(MongoDBConfig config) throws UnknownHostException {
+	public static Datastore createMongoDBDatastore(MongoDBConfig config) throws UnknownHostException {
 		
 		/**
 		 * establish the connection to MongoDB
@@ -36,7 +36,7 @@ public class MongoDBDatastoreFactory {
 		 * wrap the MongoClient and DB into the MongoDBDatastore object
 		 */
 		
-		MongoDBDatastore datastore = new MongoDBDatastoreImpl(mongo, db);
+		Datastore datastore = new MongoDBDatastore(mongo, db);
 		return datastore;
 	}
 }

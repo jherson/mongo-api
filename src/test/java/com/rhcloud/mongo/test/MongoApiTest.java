@@ -12,9 +12,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.rhcloud.mongo.MongoDBDatastore;
+import com.rhcloud.mongo.Datastore;
 import com.rhcloud.mongo.MongoDBConfig;
-import com.rhcloud.mongo.MongoDBDatastoreFactory;
+import com.rhcloud.mongo.DatastoreFactory;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
@@ -25,7 +25,7 @@ public class MongoApiTest {
 	private static final String username = "test";
 	private static final String password = "test";
 	
-	private static MongoDBDatastore datastore;
+	private static Datastore datastore;
 	
 	@Before
 	public void initDB() {
@@ -37,7 +37,7 @@ public class MongoApiTest {
 		config.setPassword(password);
 		
 		try {
-			datastore = MongoDBDatastoreFactory.connect(config);
+			datastore = DatastoreFactory.createMongoDBDatastore(config);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
