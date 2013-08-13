@@ -10,10 +10,11 @@ import com.rhcloud.mongo.annotation.Id;
 
 @Document(collectionName="TestObjects")
 public class MongoTestObject {
-	
+		
 	@Id
 	@SerializedName("_id")
 	private ObjectId id;
+	
 	private String name;
 	private Date creationDate;
 	

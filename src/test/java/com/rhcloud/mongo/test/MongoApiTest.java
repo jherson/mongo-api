@@ -56,14 +56,10 @@ public class MongoApiTest {
 		testObject.setName("Mongo Test Object");
 		
 		testObject = datastore.insert(MongoTestObject.class, testObject);
-		
-		System.out.println("Id: " + testObject.getId());
 						
 		assertNotNull(testObject.getId());
 		
 		testObject = datastore.find(MongoTestObject.class, testObject.getId());
-		
-		System.out.println("Id: " + testObject.getId());
 		
 		assertNotNull(testObject);
 		
@@ -76,8 +72,8 @@ public class MongoApiTest {
 		
 		assertEquals(testObject.getName(), datastore.find(MongoTestObject.class, testObject.getId()).getName());
 		
-		//datastore.delete(MongoTestObject.class, testObject);
+		datastore.delete(testObject);
 				
-		//assertNull(datastore.find(MongoTestObject.class, testObject.getId()));
+		assertNull(datastore.find(MongoTestObject.class, testObject.getId()));
 	}
 }

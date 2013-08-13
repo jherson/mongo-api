@@ -73,8 +73,8 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 * constructor
 	 */
 	
-	public MongoDBDatastore() {
-		
+	protected MongoDBDatastore() {
+		 
 	}	
 	
 	/**
@@ -82,7 +82,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 * @param mongo
 	 */
 	
-	public MongoDBDatastore(MongoClient mongo, DB db) {
+	protected MongoDBDatastore(MongoClient mongo, DB db) {
 		this.mongo = mongo;
 		this.db = db;
 	}
@@ -113,7 +113,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 */
 	
 	@Override
-	public <T> T insert(Class<T> clazz, Object object) {
+	public <T> T insert(Class<T> clazz, Object object) {		
 		String collectionName = AnnotationScanner.getCollectionName(clazz);		
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);	
@@ -132,7 +132,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 */
 	
 	@Override
-	public <T> T update(Class<T> clazz, Object object) {
+	public <T> T update(Class<T> clazz, Object object) {						
 		String collectionName = AnnotationScanner.getCollectionName(clazz);
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);
@@ -181,6 +181,11 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	public <T> void delete(Object object) {
 		String collectionName = AnnotationScanner.getCollectionName(object.getClass());
 		DBCollection collection = getDB().getCollection(collectionName);
+		Object id = AnnotationScanner.getId(object);
+		WriteResult wr = collection.remove(new BasicDBObject("_id", id));
+		if (wr.getError() != null) {
+			throw new MongoException(wr.getLastError());
+		}
 	}
 	
 	/**
