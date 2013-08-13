@@ -1,70 +1,99 @@
+
+/**
+ * 
+ * Copyright 2013 John D. Herson
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.rhcloud.mongo;
 
-import java.io.Serializable;
-import java.net.UnknownHostException;
+import org.bson.types.ObjectId;
 
 import com.mongodb.DB;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
-import com.mongodb.ReadPreference;
-import com.mongodb.ServerAddress;
 
-public class MongoDBDatastore implements Serializable {
-
-	/**
-	 * 
-	 */
-	
-	private static final long serialVersionUID = 397801758398054504L;
+/**
+ * @author jherson
+ *
+ */
+public interface MongoDBDatastore {
 	
 	/**
 	 * 
+	 * @param db
 	 */
 	
-	private MongoDBDatastoreConfig config;
+	public void setDB(DB db);
 	
 	/**
-	 * 
+	 * insert
+	 * @param clazz
+	 * @param object
+	 * @return T
 	 */
 	
-	private MongoClient mongo;
+	public <T> T insert(Class<T> clazz, Object object);
+	
+	/**
+	 * update
+	 * 
+	 * @param clazz
+	 * @param object
+	 * @return T
+	 */
+	
+	public <T> T update(Class<T> clazz, Object object);
+	
+	/**
+	 * delete
+	 * 
+	 * @param clazz
+	 * @param object
+	 */
+	
+	public <T> void delete(Class<T> clazz, Object object);
 
 	/**
+	 * delete
 	 * 
+	 * @param clazz
 	 */
 	
-	private DB db;
+	public <T> void delete(Object object);
 	
 	/**
-	 * MongoDBDatastore
-	 * @param config
+	 * find
+	 * 
+	 * @param clazz
+	 * @param id
+	 * @return T
 	 */
-
-	public MongoDBDatastore(MongoDBDatastoreConfig config) {
-		this.config = config;				
-	}	
 	
-	public void connect() throws UnknownHostException {
-		
-		/**
-		 * establish the connection to MongoDB
-		 */
-		
-		mongo = new MongoClient(new ServerAddress(config.getHost(), config.getPort()));		
-		mongo.setReadPreference(ReadPreference.primaryPreferred());
-		
-		/**
-		 * log into the DB
-		 */
-		
-		db = mongo.getDB(config.getDatabase());
-		
-		/**
-		 * handle authentication failure
-		 */
-		
-		if (!db.authenticate(config.getUsername(), config.getPassword().toCharArray())) {
-			throw new MongoException(String.format("Failed to authenticate against db: %s", db));
-		}
-	}
+	public <T> T find(Class<T> clazz, ObjectId id);	
+	
+	/**
+	 * createQuery
+	 * 
+	 * @param clazz
+	 * @return Query
+	 */
+	
+	public <T> Query<T> createQuery(Class<T> clazz);
+	
+	/**
+	 * close
+	 */
+	
+	public void close();
 }

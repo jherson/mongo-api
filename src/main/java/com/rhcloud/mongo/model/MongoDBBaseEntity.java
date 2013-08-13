@@ -57,7 +57,7 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	 */
 	
 	@SerializedName("_id")
-	private ObjectId _id;
+	private ObjectId id;
 	
 	/**
 	 * constructor
@@ -82,7 +82,7 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	 */
 	
 	public ObjectId getId() {
-		return _id;
+		return id;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	 */
 	
 	public void setId(ObjectId id) {
-		this._id = id;
+		this.id = id;
 	}
 	
 	/**

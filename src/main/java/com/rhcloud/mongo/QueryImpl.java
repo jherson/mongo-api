@@ -3,12 +3,10 @@ package com.rhcloud.mongo;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.Gson;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
-import com.mongodb.util.JSON;
 
 /**
  * @author jherson
@@ -40,12 +38,6 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected Gson gson;
-	
-	/**
-	 * 
-	 */
-	
 	protected QueryBuilder queryBuilder;
 	
 	/**
@@ -55,16 +47,22 @@ public class QueryImpl<T> implements Query<T> {
 	protected String collectionName;
 	
 	/**
-	 * constructor
 	 * 
-	 * @param db
-	 * @param gson
 	 */
 	
-	public QueryImpl(Class<T> clazz, DB db, Gson gson) {
-		this.db = db;
-		this.clazz = clazz;		
-		this.gson = gson;			
+	protected MongoDBDatastoreImpl mongoDBDao;
+	
+	/**
+	 * constructor
+	 * 
+	 * @param mongoDBDao
+	 * @param clazz
+	 */
+	
+	protected QueryImpl(MongoDBDatastoreImpl mongoDBDao, Class<T> clazz) {
+		this.mongoDBDao = mongoDBDao;
+		this.db = mongoDBDao.getDB();
+		this.clazz = clazz;					
 		this.collection = db.getCollection(AnnotationScanner.getCollectionName(clazz));
 		this.queryBuilder = QueryBuilder.start();
 	}
@@ -104,7 +102,7 @@ public class QueryImpl<T> implements Query<T> {
 		
 	@Override
 	public T getSingleResult() {
-		return getAsObject(clazz, collection.findOne(queryBuilder.get()));
+		return mongoDBDao.getAsObject(clazz, collection.findOne(queryBuilder.get()));
 	}
 	
 	/**
@@ -120,12 +118,8 @@ public class QueryImpl<T> implements Query<T> {
 		
 		List<T> queryResult = new ArrayList<T>();
 		while (cursor.hasNext()) {
-			queryResult.add(getAsObject(clazz, cursor.next()));
+			queryResult.add(mongoDBDao.getAsObject(clazz, cursor.next()));
 		}
 		return queryResult;
-	}
-		
-	private T getAsObject(Class<T> clazz, Object object) {
-		return gson.fromJson(JSON.serialize(object), clazz);
 	}
 }

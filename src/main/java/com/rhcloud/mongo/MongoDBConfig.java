@@ -2,7 +2,9 @@ package com.rhcloud.mongo;
 
 import java.io.Serializable;
 
-public class MongoDBDatastoreConfig implements Serializable {
+import com.mongodb.ReadPreference;
+
+public class MongoDBConfig implements Serializable {
 
 	/**
 	 * 
@@ -14,38 +16,45 @@ public class MongoDBDatastoreConfig implements Serializable {
 	 * 
 	 */
 	
-	public String host;
+	private String host;
 	
 	/**
 	 * 
 	 */
 	
-	public String database;
+	private String database;
 	
 	/**
 	 * 
 	 */
 	
-	public int port;
+	private int port;
 	
 	/**
 	 * 
 	 */
 	
-	public String username;
+	private String username;
 	
 	/**
 	 * 
 	 */
 	
-	public String password;
+	private String password;
+	
+	/**
+	 * 
+	 */
+	
+	private ReadPreference readPreference;
 	
 	
 	/**
 	 * constructor
 	 */
-	public MongoDBDatastoreConfig() {
-		
+	
+	public MongoDBConfig() {
+		setReadPreference(ReadPreference.primaryPreferred());
 	}
 	
 	/**
@@ -145,5 +154,25 @@ public class MongoDBDatastoreConfig implements Serializable {
 	
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	/**
+	 * getReadPreference
+	 * 
+	 * @return ReadPreference
+	 */
+	
+	public ReadPreference getReadPreference() {
+		return readPreference;
+	}
+	
+	/**
+	 * setReadPreference
+	 * 
+	 * @param readPreference
+	 */
+	
+	public void setReadPreference(ReadPreference readPreference) {
+		this.readPreference = readPreference;
 	}
 }

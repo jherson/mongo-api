@@ -2,12 +2,16 @@ package com.rhcloud.mongo.test.model;
 
 import org.bson.types.ObjectId;
 
+import com.google.gson.annotations.SerializedName;
 import com.rhcloud.mongo.annotation.Document;
+import com.rhcloud.mongo.annotation.Id;
 
 @Document(collectionName="TestObjects")
 public class MongoTestObject {
 	
-	private ObjectId _id;
+	@Id
+	@SerializedName("_id")
+	private ObjectId id;
 	private String name;
 	
 	public MongoTestObject() {
@@ -15,11 +19,11 @@ public class MongoTestObject {
 	}
 	
 	public ObjectId getId() {
-		return _id;
+		return id;
 	}
 	
-	public void setId(ObjectId _id) {
-		this._id = _id;
+	public void setId(ObjectId id) {
+		this.id = id;
 	}
 
 	public String getName() {

@@ -16,9 +16,11 @@
  * 
  */
 
-package com.rhcloud.mongo.dao.impl;
+package com.rhcloud.mongo;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
@@ -30,20 +32,17 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
-import com.rhcloud.mongo.AnnotationScanner;
-import com.rhcloud.mongo.Query;
-import com.rhcloud.mongo.QueryImpl;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
-import com.rhcloud.mongo.dao.MongoDBDao;
 
 /**
  * @author jherson
  *
  */
-public class MongoDBDaoImpl implements MongoDBDao, Serializable {
+public class MongoDBDatastoreImpl implements MongoDBDatastore, Serializable {
 	
 	/**
 	 * 
@@ -60,12 +59,36 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 			registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter()).
 			registerTypeAdapter(Date.class, new DateTypeAdapter()).
 			create();
-
+	
 	/**
 	 * 
 	 */
 	
-	protected DB db;	
+	private MongoClient mongo; 
+	
+	/**
+	 * 
+	 */
+	
+	private DB db;
+	
+	/**
+	 * constructor
+	 */
+	
+	public MongoDBDatastoreImpl() {
+		
+	}	
+	
+	/**
+	 * constructor
+	 * @param mongo
+	 */
+	
+	public MongoDBDatastoreImpl(MongoClient mongo, DB db) {
+		this.mongo = mongo;
+		this.db = db;
+	}
 
 	/**
 	 * sets the MongoDB for use in this DAO
@@ -74,6 +97,15 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 
 	public void setDB(DB db) {
 		this.db = db;
+	}
+	
+	/**
+	 * getDB
+	 * @return DB
+	 */
+	
+	protected DB getDB() {
+		return db;
 	}
 	
 	/**
@@ -86,7 +118,7 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	@Override
 	public <T> T insert(Class<T> clazz, Object object) {
 		String collectionName = AnnotationScanner.getCollectionName(clazz);		
-		DBCollection collection = db.getCollection(collectionName);
+		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);	
 		WriteResult result = collection.insert(dbObject);
 		if (result.getError() != null) {
@@ -105,7 +137,7 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	@Override
 	public <T> T update(Class<T> clazz, Object object) {
 		String collectionName = AnnotationScanner.getCollectionName(clazz);
-		DBCollection collection = db.getCollection(collectionName);
+		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);
 		WriteResult result = collection.save(dbObject);
 		if (result.getError() != null) {
@@ -124,7 +156,7 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	
 	@SuppressWarnings({ "unchecked" })
 	@Override
-	public  <T> T find(Class<T> clazz, ObjectId id) {
+	public <T> T find(Class<T> clazz, ObjectId id) {
 		return (T) createQuery(clazz)
 				.put("_id")
 				.is(id)
@@ -140,12 +172,34 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	@Override
 	public <T> void delete(Class<T> clazz, Object object) {		
 		String collectionName = AnnotationScanner.getCollectionName(clazz);
-		DBCollection collection = db.getCollection(collectionName);
+		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(clazz, object);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}
+	}
+	
+	@Override
+	public <T> void delete(Object object) {
+		String collectionName = AnnotationScanner.getCollectionName(object.getClass());
+		DBCollection collection = getDB().getCollection(collectionName);
+		
+		Field field = AnnotationScanner.getIdField(object.getClass());
+		System.out.println(field.getName());
+		field.setAccessible(Boolean.TRUE);
+		//try {
+			//Method method = object.getClass().getField("get" + field.getName());
+			//Object id = method.invoke(arg0, arg1)
+			//System.out.println("ID: " + id);
+			////WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(id.toString())));
+			////if (wr.getError() != null) {
+			//	throw new MongoException(wr.getLastError());
+			//}
+	//	} catch (IllegalArgumentException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+		//	e.printStackTrace();
+		//}
 	}
 	
 	/**
@@ -156,14 +210,23 @@ public class MongoDBDaoImpl implements MongoDBDao, Serializable {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public <T> Query createQuery(Class<T> clazz) {		
-		return new QueryImpl(clazz, db, gson);
+		return new QueryImpl(this, clazz);
 	}
 	
-	private <T> DBObject getAsDBObject(Class<T> clazz, Object object) {
+	/**
+	 * close
+	 */
+	
+	@Override
+	public void close() {
+		mongo.close();
+	}
+	
+	protected <T> DBObject getAsDBObject(Class<T> clazz, Object object) {
 		return (DBObject) JSON.parse(gson.toJson(object));
 	}
 	
-	private <T> T getAsObject(Class<T> clazz, Object object) {
+	protected <T> T getAsObject(Class<T> clazz, Object object) {
 		return gson.fromJson(JSON.serialize(object), clazz);
 	}
 }
