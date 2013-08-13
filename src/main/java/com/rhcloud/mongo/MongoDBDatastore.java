@@ -25,7 +25,6 @@ import org.bson.types.ObjectId;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.bind.DateTypeAdapter;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -34,6 +33,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
+import com.rhcloud.mongo.adapter.DateTypeAdapter;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
 
 /**
@@ -52,11 +52,10 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 * 
 	 */
 	
-	private static final Gson gson = new GsonBuilder().			
-			serializeNulls().	
-			registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter()).
-			registerTypeAdapter(Date.class, new DateTypeAdapter()).
-			create();
+	private static final Gson gson = new GsonBuilder().serializeNulls()
+			.registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter())
+			.registerTypeAdapter(Date.class, new DateTypeAdapter())
+			.create();
 	
 	/**
 	 * 

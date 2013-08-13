@@ -1,5 +1,7 @@
 package com.rhcloud.mongo.test.model;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 
 import com.google.gson.annotations.SerializedName;
@@ -13,9 +15,10 @@ public class MongoTestObject {
 	@SerializedName("_id")
 	private ObjectId id;
 	private String name;
+	private Date creationDate;
 	
 	public MongoTestObject() {
-		
+		creationDate = new Date();
 	}
 	
 	public ObjectId getId() {
@@ -32,5 +35,13 @@ public class MongoTestObject {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public Date getCreationDate() {
+		return creationDate;
+	}
+	
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
 	}
 }
