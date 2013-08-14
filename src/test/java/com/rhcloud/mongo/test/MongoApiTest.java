@@ -75,7 +75,7 @@ public class MongoApiTest {
 	
 	@Test
 	public void testDelete() {
-		MongoTestObject testObject = documentManager.createQuery(MongoTestObject.class).put("name").is("Mongo Test Object").getSingleResult();
+		MongoTestObject testObject = documentManager.createQuery(MongoTestObject.class).put("name").isEqual("Mongo Test Object").getSingleResult();
 		
 		assertNotNull(testObject);
 		

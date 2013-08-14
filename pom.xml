@@ -58,6 +58,12 @@
 			<version>2.10.1</version>
 		</dependency>
 		<dependency>
+			<groupId>org.jboss.msc</groupId>
+			<artifactId>jboss-msc</artifactId>
+			<version>1.0.2.GA</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections-maven</artifactId>
 			<version>0.9.9-RC1</version>

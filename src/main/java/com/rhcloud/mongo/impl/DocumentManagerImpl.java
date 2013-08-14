@@ -185,7 +185,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	public <T> T find(Class<T> clazz, ObjectId id) {
 		return (T) createQuery(clazz)
 				.put("_id")
-				.is(id)
+				.isEqual(id)
 				.getSingleResult();
 	}
 	

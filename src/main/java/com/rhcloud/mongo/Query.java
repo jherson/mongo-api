@@ -20,7 +20,7 @@ public interface Query<T> {
 	 * @return Query
 	 */
 	
-	public Query<T> is(Object value);
+	public Query<T> isEqual(Object value);
 	
 	/**
 	 * getSingleResult

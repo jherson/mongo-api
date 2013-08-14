@@ -84,7 +84,7 @@ public class QueryImpl<T> implements Query<T> {
 	 */
 	
 	@Override
-	public Query<T> is(Object value) {
+	public Query<T> isEqual(Object value) {
 		queryBuilder.is(value);
 		return this;
 	}
