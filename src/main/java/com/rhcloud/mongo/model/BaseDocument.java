@@ -35,7 +35,7 @@ import com.rhcloud.mongo.annotation.Id;
  *
  */
 
-public abstract class MongoDBBaseEntity implements Serializable {
+public abstract class BaseDocument implements Serializable {
 
 	/**
 	 * 
@@ -65,7 +65,7 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	 * constructor
 	 */
 	
-	public MongoDBBaseEntity() {
+	public BaseDocument() {
 		
 	}
 	
@@ -74,7 +74,7 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	 * @param json
 	 */
 	
-	public MongoDBBaseEntity(String json) {
+	public BaseDocument(String json) {
 		gson.fromJson(json, this.getClass());
 	}
 	

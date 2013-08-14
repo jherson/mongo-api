@@ -2,15 +2,11 @@ package com.rhcloud.mongo.test.model;
 
 import java.util.Date;
 
-import org.bson.types.ObjectId;
-
-import com.google.gson.annotations.SerializedName;
-import com.rhcloud.mongo.model.MongoDBBaseEntity;
+import com.rhcloud.mongo.model.BaseDocument;
 import com.rhcloud.mongo.annotation.Document;
-import com.rhcloud.mongo.annotation.Id;
 
 @Document(collection = "TestObjects")
-public class MongoTestObject extends MongoDBBaseEntity {
+public class MongoTestObject extends BaseDocument {
 		
 	/**
 	 * 
