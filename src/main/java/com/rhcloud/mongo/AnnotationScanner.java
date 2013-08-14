@@ -23,22 +23,6 @@ import com.rhcloud.mongo.annotation.Document;
 import com.rhcloud.mongo.annotation.Id;
 
 public class AnnotationScanner {
-	
-	private String collection;
-	private Object id;
-	
-	protected AnnotationScanner(Object object) {
-		collection = getCollectionName(object);
-		id = getId(object);
-	}
-	
-	public String getCollection() {
-		return collection;
-	}
-	
-	public Object getId() {
-		return id;
-	}
 
 	/**
 	 * getCollectionName

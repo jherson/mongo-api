@@ -27,7 +27,7 @@ import com.mongodb.DB;
  * @author jherson
  *
  */
-public interface Datastore {
+public interface DocumentManager {
 	
 	/**
 	 * 

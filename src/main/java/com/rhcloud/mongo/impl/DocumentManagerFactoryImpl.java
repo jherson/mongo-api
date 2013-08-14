@@ -1,15 +1,31 @@
-package com.rhcloud.mongo;
+package com.rhcloud.mongo.impl;
 
+import java.io.Serializable;
 import java.net.UnknownHostException;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.ServerAddress;
+import com.rhcloud.mongo.DocumentManager;
+import com.rhcloud.mongo.DocumentManagerFactory;
+import com.rhcloud.mongo.MongoDBConfig;
 
-public class DatastoreFactory {
+public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Serializable {
+
+	/**
+	 * 
+	 */
 	
-	public static Datastore createMongoDBDatastore(MongoDBConfig config) throws UnknownHostException {
+	private static final long serialVersionUID = 8406720002314923220L;
+	
+	/**
+	 * createDocumentManager
+	 * 
+	 * @param config
+	 */
+
+	public DocumentManager createDocumentManager(MongoDBConfig config) throws UnknownHostException {
 		
 		/**
 		 * establish the connection to MongoDB
@@ -36,7 +52,7 @@ public class DatastoreFactory {
 		 * wrap the MongoClient and DB into the MongoDBDatastore object
 		 */
 		
-		Datastore datastore = new MongoDBDatastore(mongo, db);
-		return datastore;
+		DocumentManager documentManager = new DocumentManagerImpl(mongo, db);
+		return documentManager;
 	}
 }

@@ -16,7 +16,7 @@
  * 
  */
 
-package com.rhcloud.mongo;
+package com.rhcloud.mongo.impl;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -35,6 +35,9 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
+import com.rhcloud.mongo.AnnotationScanner;
+import com.rhcloud.mongo.DocumentManager;
+import com.rhcloud.mongo.Query;
 import com.rhcloud.mongo.adapter.DateTypeAdapter;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
 
@@ -42,7 +45,7 @@ import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
  * @author jherson
  *
  */
-public class MongoDBDatastore implements Datastore, Serializable {
+public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * 
@@ -81,7 +84,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 * constructor
 	 */
 	
-	protected MongoDBDatastore() {
+	protected DocumentManagerImpl() {
 		 
 	}	
 	
@@ -90,10 +93,10 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 * @param mongo
 	 */
 	
-	protected MongoDBDatastore(MongoClient mongo, DB db) {
+	protected DocumentManagerImpl(MongoClient mongo, DB db) {
 		this.mongo = mongo;
 		this.db = db;
-		MongoDBDatastore.mapper = Maps.newHashMap();
+		DocumentManagerImpl.mapper = Maps.newHashMap();
 	}
 
 	/**

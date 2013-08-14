@@ -12,14 +12,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.rhcloud.mongo.Datastore;
+import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.MongoDBConfig;
-import com.rhcloud.mongo.DatastoreFactory;
+import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
 	
-	private static Datastore datastore;
+	private static DocumentManager documentManager;
 	
 	@Before
 	public void initDB() {
@@ -37,7 +37,7 @@ public class MongoApiTest {
 		config.setPassword(password);
 		
 		try {
-			datastore = DatastoreFactory.createMongoDBDatastore(config);
+			documentManager = new DocumentManagerFactoryImpl().createDocumentManager(config);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -46,7 +46,7 @@ public class MongoApiTest {
 	
 	@After
 	public void closeDB() {
-		datastore.close();
+		documentManager.close();
 	}
 
 	@Test
@@ -55,25 +55,32 @@ public class MongoApiTest {
 		MongoTestObject testObject = new MongoTestObject();
 		testObject.setName("Mongo Test Object");
 		
-		testObject = datastore.insert(MongoTestObject.class, testObject);
+		testObject = documentManager.insert(MongoTestObject.class, testObject);
 						
 		assertNotNull(testObject.getId());
 		
-		testObject = datastore.find(MongoTestObject.class, testObject.getId());
+		testObject = documentManager.find(MongoTestObject.class, testObject.getId());
 		
 		assertNotNull(testObject);
 		
-		List<MongoTestObject> testObjectList = datastore.createQuery(MongoTestObject.class).getResultList();
+		List<MongoTestObject> testObjectList = documentManager.createQuery(MongoTestObject.class).getResultList();
 		
 		assertNotNull(testObjectList);
 		assertNotEquals(testObjectList.size(), 0);
 		
-        testObject = datastore.update(MongoTestObject.class, testObject);
+        testObject = documentManager.update(MongoTestObject.class, testObject);
 		
-		assertEquals(testObject.getName(), datastore.find(MongoTestObject.class, testObject.getId()).getName());
+		assertEquals(testObject.getName(), documentManager.find(MongoTestObject.class, testObject.getId()).getName());				
+	}
+	
+	@Test
+	public void testDelete() {
+		MongoTestObject testObject = documentManager.createQuery(MongoTestObject.class).put("name").is("Mongo Test Object").getSingleResult();
 		
-		datastore.delete(testObject);
-				
-		assertNull(datastore.find(MongoTestObject.class, testObject.getId()));
+		assertNotNull(testObject);
+		
+		documentManager.delete(testObject);
+		
+		assertNull(documentManager.find(MongoTestObject.class, testObject.getId()));
 	}
 }

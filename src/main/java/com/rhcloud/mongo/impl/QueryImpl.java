@@ -1,4 +1,4 @@
-package com.rhcloud.mongo;
+package com.rhcloud.mongo.impl;
 
 import java.util.List;
 
@@ -7,6 +7,8 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
+import com.rhcloud.mongo.AnnotationScanner;
+import com.rhcloud.mongo.Query;
 
 /**
  * @author jherson
@@ -44,7 +46,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected MongoDBDatastore datastore;
+	protected DocumentManagerImpl datastore;
 	
 	/**
 	 * constructor
@@ -53,7 +55,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * @param clazz
 	 */
 	
-	protected QueryImpl(MongoDBDatastore datastore, Class<T> clazz) {
+	protected QueryImpl(DocumentManagerImpl datastore, Class<T> clazz) {
 		this.datastore = datastore;	
 		this.clazz = clazz;
 		this.db = datastore.getDB();
