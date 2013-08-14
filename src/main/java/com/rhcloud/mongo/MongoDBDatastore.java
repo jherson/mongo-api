@@ -20,9 +20,11 @@ package com.rhcloud.mongo;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 import org.bson.types.ObjectId;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mongodb.BasicDBObject;
@@ -61,6 +63,12 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 * 
 	 */
 	
+	private static Map<Class<?>, String> mapper;
+	
+	/**
+	 * 
+	 */
+	
 	private MongoClient mongo; 
 	
 	/**
@@ -85,6 +93,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	protected MongoDBDatastore(MongoClient mongo, DB db) {
 		this.mongo = mongo;
 		this.db = db;
+		MongoDBDatastore.mapper = Maps.newHashMap();
 	}
 
 	/**
@@ -113,10 +122,18 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 */
 	
 	@Override
-	public <T> T insert(Class<T> clazz, Object object) {		
-		String collectionName = AnnotationScanner.getCollectionName(clazz);		
+	public <T> T insert(Class<T> clazz, Object object) {
+		String collectionName = null;
+		if (mapper.containsKey(clazz)) {
+			System.out.println("found");
+			collectionName = mapper.get(clazz);
+		} else {
+			System.out.println("not found");
+			collectionName = AnnotationScanner.getCollectionName(object);	
+		}
+		mapper.put(clazz, collectionName);
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(clazz, object);	
+		DBObject dbObject = getAsDBObject(object);	
 		WriteResult result = collection.insert(dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
@@ -132,10 +149,19 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	 */
 	
 	@Override
-	public <T> T update(Class<T> clazz, Object object) {						
-		String collectionName = AnnotationScanner.getCollectionName(clazz);
+	public <T> T update(Class<T> clazz, Object object) {		
+		String collectionName = null;
+		if (mapper.containsKey(clazz)) {
+			System.out.println("found");
+			collectionName = mapper.get(clazz);
+		} else {
+			System.out.println("not found");
+			collectionName = AnnotationScanner.getCollectionName(object);	
+		}
+		mapper.put(clazz, collectionName);
+		//String collectionName = AnnotationScanner.getCollectionName(object);
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(clazz, object);
+		DBObject dbObject = getAsDBObject(object);
 		WriteResult result = collection.save(dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
@@ -168,9 +194,9 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	
 	@Override
 	public <T> void delete(Class<T> clazz, Object object) {		
-		String collectionName = AnnotationScanner.getCollectionName(clazz);
+		String collectionName = AnnotationScanner.getCollectionName(object);
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = getAsDBObject(clazz, object);	
+		DBObject dbObject = getAsDBObject(object);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
@@ -179,7 +205,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 	
 	@Override
 	public <T> void delete(Object object) {
-		String collectionName = AnnotationScanner.getCollectionName(object.getClass());
+		String collectionName = AnnotationScanner.getCollectionName(object);
 		DBCollection collection = getDB().getCollection(collectionName);
 		Object id = AnnotationScanner.getId(object);
 		WriteResult wr = collection.remove(new BasicDBObject("_id", id));
@@ -208,7 +234,7 @@ public class MongoDBDatastore implements Datastore, Serializable {
 		mongo.close();
 	}
 	
-	protected <T> DBObject getAsDBObject(Class<T> clazz, Object object) {
+	protected <T> DBObject getAsDBObject(Object object) {
 		return (DBObject) JSON.parse(gson.toJson(object));
 	}
 	

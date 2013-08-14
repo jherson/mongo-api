@@ -27,6 +27,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
+import com.rhcloud.mongo.annotation.Id;
 
 /**
  * 
@@ -56,6 +57,7 @@ public abstract class MongoDBBaseEntity implements Serializable {
 	 * 
 	 */
 	
+	@Id
 	@SerializedName("_id")
 	private ObjectId id;
 	

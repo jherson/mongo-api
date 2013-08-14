@@ -1,8 +1,8 @@
 package com.rhcloud.mongo;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -44,13 +44,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected String collectionName;
-	
-	/**
-	 * 
-	 */
-	
-	protected MongoDBDatastore mongoDBDao;
+	protected MongoDBDatastore datastore;
 	
 	/**
 	 * constructor
@@ -59,10 +53,10 @@ public class QueryImpl<T> implements Query<T> {
 	 * @param clazz
 	 */
 	
-	protected QueryImpl(MongoDBDatastore mongoDBDao, Class<T> clazz) {
-		this.mongoDBDao = mongoDBDao;
-		this.db = mongoDBDao.getDB();
-		this.clazz = clazz;					
+	protected QueryImpl(MongoDBDatastore datastore, Class<T> clazz) {
+		this.datastore = datastore;	
+		this.clazz = clazz;
+		this.db = datastore.getDB();
 		this.collection = db.getCollection(AnnotationScanner.getCollectionName(clazz));
 		this.queryBuilder = QueryBuilder.start();
 	}
@@ -102,7 +96,7 @@ public class QueryImpl<T> implements Query<T> {
 		
 	@Override
 	public T getSingleResult() {
-		return mongoDBDao.getAsObject(clazz, collection.findOne(queryBuilder.get()));
+		return datastore.getAsObject(clazz, collection.findOne(queryBuilder.get()));
 	}
 	
 	/**
@@ -116,9 +110,13 @@ public class QueryImpl<T> implements Query<T> {
 	public List<T> getResultList() {			
 		DBCursor cursor = collection.find(queryBuilder.get());
 		
-		List<T> queryResult = new ArrayList<T>();
-		while (cursor.hasNext()) {
-			queryResult.add(mongoDBDao.getAsObject(clazz, cursor.next()));
+		List<T> queryResult = Lists.newArrayList();
+		try {
+			while (cursor.hasNext()) {
+				queryResult.add(datastore.getAsObject(clazz, cursor.next()));
+			}
+		} finally {
+			cursor.close();
 		}
 		return queryResult;
 	}

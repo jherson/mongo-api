@@ -19,16 +19,16 @@ import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
 	
-	private static final String host = "ds037468.mongolab.com";
-	private static final String port = "37468";
-	private static final String database = "apitest"; 
-	private static final String username = "test";
-	private static final String password = "test";
-	
 	private static Datastore datastore;
 	
 	@Before
 	public void initDB() {
+		final String host = "ds037468.mongolab.com";
+		final String port = "37468";
+		final String database = "apitest"; 
+		final String username = "test";
+		final String password = "test";
+		
 		MongoDBConfig config = new MongoDBConfig();
 		config.setHost(host);
 		config.setPort(Integer.decode(port));
