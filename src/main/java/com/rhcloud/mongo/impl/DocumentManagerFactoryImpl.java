@@ -22,7 +22,37 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	/**
 	 * createDocumentManager
 	 * 
+	 * @return DocumentManager
+	 * @exception UnknownHostException
+	 */
+	
+	public DocumentManager createDocumentManager() throws UnknownHostException {
+		
+		/**
+		 * configure MongoDB from Openshift environment variables 
+		 */
+		
+		MongoDBConfig config = new MongoDBConfig();
+		config.setHost(System.getenv("OPENSHIFT_MONGODB_DB_HOST"));
+		config.setPort(Integer.decode(System.getenv("OPENSHIFT_MONGODB_DB_PORT")));
+		config.setDatabase(System.getenv("OPENSHIFT_APP_NAME"));
+		config.setUsername(System.getenv("OPENSHIFT_MONGODB_DB_USERNAME"));
+		config.setPassword(System.getenv("OPENSHIFT_MONGODB_DB_PASSWORD"));
+		
+		/**
+		 * return DocumentManager
+		 */
+		
+		return createDocumentManager(config);
+
+	}
+	
+	/**
+	 * createDocumentManager
+	 * 
 	 * @param config
+	 * @return DocumentManager
+	 * @exception UnknownHostException
 	 */
 
 	public DocumentManager createDocumentManager(MongoDBConfig config) throws UnknownHostException {
@@ -49,10 +79,21 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		}
 		
 		/**
+		 * set config to null to clear out credentials
+		 */
+		
+		config = null;
+		
+		/**
 		 * wrap the MongoClient and DB into the MongoDBDatastore object
 		 */
 		
 		DocumentManager documentManager = new DocumentManagerImpl(mongo, db);
+		
+		/**
+		 * return DocumentManager
+		 */
+		
 		return documentManager;
 	}
 }

@@ -233,6 +233,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	/**
 	 * createQuery
 	 * 
+	 * @param clazz
 	 * @return Query
 	 */
 	
