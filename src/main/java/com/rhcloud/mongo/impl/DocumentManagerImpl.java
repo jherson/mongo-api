@@ -45,6 +45,7 @@ import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
  * @author jherson
  *
  */
+
 public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
@@ -96,7 +97,8 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	protected DocumentManagerImpl(MongoClient mongo, DB db) {
 		this.mongo = mongo;
 		this.db = db;
-		DocumentManagerImpl.mapper = Maps.newHashMap();
+		
+		DocumentManagerImpl.mapper = Maps.newConcurrentMap();
 	}
 
 	/**
@@ -119,6 +121,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * inserts an object into a collection
+	 * 
 	 * @param clazz
 	 * @param object to be inserted
 	 * @return T
@@ -146,6 +149,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * updates the object in the collection
+	 * 
 	 * @param clazz
 	 * @param object to be updated
 	 * @return the updated object
@@ -174,6 +178,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * find a document in a collection using the objectId
+	 * 
 	 * @param <T>
 	 * @param clazz
 	 * @param id the ObjectId of the object to query
@@ -191,6 +196,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * delete a document from a collection
+	 * 
 	 * @param clazz
 	 * @param object to delete
 	 */
@@ -206,6 +212,12 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		}
 	}
 	
+	/**
+	 * delete a document from a collection
+	 * 
+	 * @param object
+	 */
+	
 	@Override
 	public <T> void delete(Object object) {
 		String collectionName = AnnotationScanner.getCollectionName(object);
@@ -219,6 +231,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * createQuery
+	 * 
 	 * @return Query
 	 */
 	
@@ -237,7 +250,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		mongo.close();
 	}
 	
-	protected <T> DBObject getAsDBObject(Object object) {
+	protected <T> DBObject getAsDBObject(Object object) {		
 		return (DBObject) JSON.parse(gson.toJson(object));
 	}
 	

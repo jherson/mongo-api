@@ -46,7 +46,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected DocumentManagerImpl datastore;
+	protected DocumentManagerImpl documentManager;
 	
 	/**
 	 * constructor
@@ -55,10 +55,10 @@ public class QueryImpl<T> implements Query<T> {
 	 * @param clazz
 	 */
 	
-	protected QueryImpl(DocumentManagerImpl datastore, Class<T> clazz) {
-		this.datastore = datastore;	
+	protected QueryImpl(DocumentManagerImpl documentManager, Class<T> clazz) {
+		this.documentManager = documentManager;	
 		this.clazz = clazz;
-		this.db = datastore.getDB();
+		this.db = documentManager.getDB();
 		this.collection = db.getCollection(AnnotationScanner.getCollectionName(clazz));
 		this.queryBuilder = QueryBuilder.start();
 	}
@@ -98,7 +98,7 @@ public class QueryImpl<T> implements Query<T> {
 		
 	@Override
 	public T getSingleResult() {
-		return datastore.getAsObject(clazz, collection.findOne(queryBuilder.get()));
+		return documentManager.getAsObject(clazz, collection.findOne(queryBuilder.get()));
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class QueryImpl<T> implements Query<T> {
 		List<T> queryResult = Lists.newArrayList();
 		try {
 			while (cursor.hasNext()) {
-				queryResult.add(datastore.getAsObject(clazz, cursor.next()));
+				queryResult.add(documentManager.getAsObject(clazz, cursor.next()));
 			}
 		} finally {
 			cursor.close();
