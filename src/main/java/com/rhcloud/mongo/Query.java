@@ -11,7 +11,7 @@ public interface Query<T> {
 	 * @return Query
 	 */
 	
-	public Query<T> put(String key);
+	public Query<T> field(String key);
 	
 	/**
 	 * is

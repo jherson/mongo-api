@@ -102,7 +102,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	}
 
 	/**
-	 * sets the MongoDB for use in this DAO
+	 * sets the MongoDB database for us in this DocumentManger
 	 * @param db 
 	 */
 
@@ -112,6 +112,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * getDB
+	 * 
 	 * @return DB
 	 */
 	
@@ -189,7 +190,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	@Override
 	public <T> T find(Class<T> clazz, ObjectId id) {
 		return (T) createQuery(clazz)
-				.put("_id")
+				.field("_id")
 				.isEqual(id)
 				.getSingleResult();
 	}

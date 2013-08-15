@@ -3,7 +3,6 @@ package com.rhcloud.mongo.impl;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
@@ -14,15 +13,15 @@ import com.rhcloud.mongo.Query;
  * @author jherson
  * @param <T>
  * @param <T>
- *
  */
+
 public class QueryImpl<T> implements Query<T> {
 	
 	/**
 	 * 
 	 */
 	
-	protected DB db;	
+	protected DocumentManagerImpl documentManager;
 	
 	/**
 	 * 
@@ -34,19 +33,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected DBCollection collection;
-	
-	/**
-	 * 
-	 */
-	
 	protected QueryBuilder queryBuilder;
-	
-	/**
-	 * 
-	 */
-	
-	protected DocumentManagerImpl documentManager;
 	
 	/**
 	 * constructor
@@ -58,8 +45,6 @@ public class QueryImpl<T> implements Query<T> {
 	protected QueryImpl(DocumentManagerImpl documentManager, Class<T> clazz) {
 		this.documentManager = documentManager;	
 		this.clazz = clazz;
-		this.db = documentManager.getDB();
-		this.collection = db.getCollection(AnnotationScanner.getCollectionName(clazz));
 		this.queryBuilder = QueryBuilder.start();
 	}
 	
@@ -71,7 +56,7 @@ public class QueryImpl<T> implements Query<T> {
 	 */
 	
 	@Override
-	public Query<T> put(String key) {
+	public Query<T> field(String key) {
 		queryBuilder.put(key);
 		return this;
 	}
@@ -98,7 +83,7 @@ public class QueryImpl<T> implements Query<T> {
 		
 	@Override
 	public T getSingleResult() {
-		return documentManager.getAsObject(clazz, collection.findOne(queryBuilder.get()));
+		return documentManager.getAsObject(clazz, getDBCollection(clazz).findOne(queryBuilder.get()));
 	}
 	
 	/**
@@ -110,7 +95,7 @@ public class QueryImpl<T> implements Query<T> {
 	
 	@Override
 	public List<T> getResultList() {			
-		DBCursor cursor = collection.find(queryBuilder.get());
+		DBCursor cursor = getDBCollection(clazz).find(queryBuilder.get());
 		
 		List<T> queryResult = Lists.newArrayList();
 		try {
@@ -121,5 +106,16 @@ public class QueryImpl<T> implements Query<T> {
 			cursor.close();
 		}
 		return queryResult;
+	}
+	
+	/**
+	 * getDBCollection
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	
+	private DBCollection getDBCollection(Class<T> clazz) {
+		return documentManager.getDB().getCollection(AnnotationScanner.getCollectionName(clazz));
 	}
 }
