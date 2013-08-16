@@ -35,7 +35,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
-import com.rhcloud.mongo.AnnotationScanner;
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.Query;
 import com.rhcloud.mongo.adapter.DateTypeAdapter;
@@ -136,7 +135,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 			collectionName = mapper.get(clazz);
 		} else {
 			System.out.println("not found");
-			collectionName = AnnotationScanner.getCollectionName(object);	
+			collectionName = AnnotationScannerImpl.getCollectionName(object);	
 		}
 		mapper.put(clazz, collectionName);
 		DBCollection collection = getDB().getCollection(collectionName);
@@ -164,7 +163,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 			collectionName = mapper.get(clazz);
 		} else {
 			System.out.println("not found");
-			collectionName = AnnotationScanner.getCollectionName(object);	
+			collectionName = AnnotationScannerImpl.getCollectionName(object);	
 		}
 		mapper.put(clazz, collectionName);
 		//String collectionName = AnnotationScanner.getCollectionName(object);
@@ -204,7 +203,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> void delete(Class<T> clazz, Object object) {		
-		String collectionName = AnnotationScanner.getCollectionName(object);
+		String collectionName = AnnotationScannerImpl.getCollectionName(object);
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(object);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
@@ -221,9 +220,9 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> void delete(Object object) {
-		String collectionName = AnnotationScanner.getCollectionName(object);
+		String collectionName = AnnotationScannerImpl.getCollectionName(object);
 		DBCollection collection = getDB().getCollection(collectionName);
-		Object id = AnnotationScanner.getId(object);
+		Object id = AnnotationScannerImpl.getId(object);
 		WriteResult wr = collection.remove(new BasicDBObject("_id", id));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());

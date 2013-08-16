@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
-import com.rhcloud.mongo.AnnotationScanner;
 import com.rhcloud.mongo.Query;
 
 /**
@@ -116,6 +115,6 @@ public class QueryImpl<T> implements Query<T> {
 	 */
 	
 	private DBCollection getDBCollection(Class<T> clazz) {
-		return documentManager.getDB().getCollection(AnnotationScanner.getCollectionName(clazz));
+		return documentManager.getDB().getCollection(AnnotationScannerImpl.getCollectionName(clazz));
 	}
 }
