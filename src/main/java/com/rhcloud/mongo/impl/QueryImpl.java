@@ -7,6 +7,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
 import com.rhcloud.mongo.Query;
+import com.rhcloud.mongo.spi.AnnotationScanner;
 
 /**
  * @author jherson
@@ -37,7 +38,7 @@ public class QueryImpl<T> implements Query<T> {
 	/**
 	 * constructor
 	 * 
-	 * @param mongoDBDao
+	 * @param documentManager
 	 * @param clazz
 	 */
 	
@@ -48,7 +49,7 @@ public class QueryImpl<T> implements Query<T> {
 	}
 	
 	/**
-	 * put
+	 * field
 	 * 
 	 * @param key 
 	 * @return Query object
@@ -61,7 +62,7 @@ public class QueryImpl<T> implements Query<T> {
 	}
 	
 	/**
-	 * is
+	 * isEqual
 	 * 
 	 * @param value
 	 * @return query object 
@@ -115,6 +116,6 @@ public class QueryImpl<T> implements Query<T> {
 	 */
 	
 	private DBCollection getDBCollection(Class<T> clazz) {
-		return documentManager.getDB().getCollection(AnnotationScannerImpl.getCollectionName(clazz));
+		return documentManager.getDB().getCollection(AnnotationScanner.getCollectionName(clazz));
 	}
 }

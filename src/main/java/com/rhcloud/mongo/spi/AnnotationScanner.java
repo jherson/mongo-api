@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.impl;
+package com.rhcloud.mongo.spi;
 
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.getAllMethods;
@@ -9,7 +9,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
+
+import javax.servlet.ServletContext;
 
 import org.bson.types.ObjectId;
 import org.reflections.Reflections;
@@ -19,27 +24,46 @@ import org.reflections.scanners.TypeElementsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
-import com.rhcloud.mongo.AnnotationScanner;
 import com.rhcloud.mongo.annotation.Document;
 import com.rhcloud.mongo.annotation.Id;
 
-public class AnnotationScannerImpl implements AnnotationScanner {
+public class AnnotationScanner {
 	
 	/**
 	 * startScan
 	 */
-	
-	@Override
-	public void startScan() {
-		Reflections reflections = new Reflections(
-				new ConfigurationBuilder()
-				.setUrls(ClasspathHelper.forJavaClassPath())
-				.setScanners(
-						new MethodAnnotationsScanner(), 
-						new TypeAnnotationsScanner(), 
-						new TypeElementsScanner()));
 
+	public void startScan() {
+		
+		System.out.println()
+		
+		/**
+		 * 
+		 */
+		
+		Collection<URL> path = Collections.emptySet();
+		path.addAll(ClasspathHelper.forJavaClassPath());
+		
+		/**
+		 * 
+		 */
+		
+		ConfigurationBuilder builder = new ConfigurationBuilder().setUrls(path)
+				.setScanners(new MethodAnnotationsScanner(), 
+						new TypeAnnotationsScanner(), new TypeElementsScanner());
+		
+		/**
+		 * 
+		 */
+		
+		Reflections reflections = new Reflections(builder);
+
+		/**
+		 * 
+		 */
+		
 		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
+		
 		System.out.println(annotated.size());
 	}
 
@@ -69,6 +93,13 @@ public class AnnotationScannerImpl implements AnnotationScanner {
 		return document.collection();
 	}
 	
+	/**
+	 * getId
+	 * 
+	 * @param object
+	 * @return
+	 */
+	
 	@SuppressWarnings("unchecked")
 	public static <T> Object getId(Object object) {
 		Set<Field> fields = getAllFields(object.getClass(), withAnnotation(Id.class));
@@ -80,7 +111,6 @@ public class AnnotationScannerImpl implements AnnotationScanner {
 			try {
 				id = methods.iterator().next().invoke(object, new Object[] {});
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
