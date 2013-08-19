@@ -9,7 +9,16 @@ import org.jboss.msc.service.ServiceRegistryException;
 
 public class MongoDBServiceActivator implements ServiceActivator {
 	
+	/**
+	 * 
+	 */
+	
 	private static final Logger log = Logger.getLogger(MongoDBServiceActivator.class.getName());
+	
+	/**
+	 * 
+	 */
+	
 	private static final ServiceName SERVICE_NAME = ServiceName.of("AnnotationScanner");
 
 	@Override

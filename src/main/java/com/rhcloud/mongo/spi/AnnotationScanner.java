@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 import org.reflections.Reflections;
@@ -27,6 +28,12 @@ import com.rhcloud.mongo.annotation.Id;
 public class AnnotationScanner {
 	
 	/**
+	 * 
+	 */
+	
+	private static final Logger log = Logger.getLogger(MongoDBServiceActivator.class.getName());
+	
+	/**
 	 * startScan
 	 */
 
@@ -36,24 +43,9 @@ public class AnnotationScanner {
 		 * 
 		 */
 		
-		Iterator<URL> iterator = ClasspathHelper.forJavaClassPath().iterator();
-		while (iterator.hasNext()) {
-			System.out.println(iterator.next());
-		}
-		
-		/**
-		 * 
-		 */
-		
-		ConfigurationBuilder builder = new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
+		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
 				.setScanners(new MethodAnnotationsScanner(), 
-						new TypeAnnotationsScanner(), new TypeElementsScanner());
-		
-		/**
-		 * 
-		 */
-		
-		Reflections reflections = new Reflections(builder);
+						new TypeAnnotationsScanner(), new TypeElementsScanner()));
 
 		/**
 		 * 
@@ -61,7 +53,7 @@ public class AnnotationScanner {
 		
 		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
 		
-		System.out.println(annotated.size());
+		log.info("MongoDB @Document annotations: " + annotated.size());
 	}
 
 	/**
