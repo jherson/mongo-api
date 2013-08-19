@@ -10,11 +10,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.Set;
-
-import javax.servlet.ServletContext;
 
 import org.bson.types.ObjectId;
 import org.reflections.Reflections;
@@ -35,20 +32,20 @@ public class AnnotationScanner {
 
 	public void startScan() {
 		
-		System.out.println()
+		/**
+		 * 
+		 */
+		
+		Iterator<URL> iterator = ClasspathHelper.forJavaClassPath().iterator();
+		while (iterator.hasNext()) {
+			System.out.println(iterator.next());
+		}
 		
 		/**
 		 * 
 		 */
 		
-		Collection<URL> path = Collections.emptySet();
-		path.addAll(ClasspathHelper.forJavaClassPath());
-		
-		/**
-		 * 
-		 */
-		
-		ConfigurationBuilder builder = new ConfigurationBuilder().setUrls(path)
+		ConfigurationBuilder builder = new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
 				.setScanners(new MethodAnnotationsScanner(), 
 						new TypeAnnotationsScanner(), new TypeElementsScanner());
 		
