@@ -45,6 +45,7 @@ public class AnnotationScanner {
 		 */
 		
 		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
+				.filterInputsBy(new FilterBuilder().excludePackage("java").excludePackage("javax"))
 				.setScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new TypeElementsScanner()));
 
 		/**
