@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.MongoDBConfig;
 import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
+import com.rhcloud.mongo.spi.AnnotationScanner;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
@@ -47,6 +48,12 @@ public class MongoApiTest {
 	@After
 	public void closeDB() {
 		documentManager.close();
+	}
+	
+	@Test
+	public void testScan() {
+		AnnotationScanner scanner = new AnnotationScanner();
+		scanner.startScan();
 	}
 
 	@Test

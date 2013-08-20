@@ -61,6 +61,7 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 			 */
 			
 			documentManager = new DocumentManagerImpl(mongo, db);
+			
 		} else {
 			
 			/**

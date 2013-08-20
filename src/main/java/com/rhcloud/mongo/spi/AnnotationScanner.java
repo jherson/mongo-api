@@ -9,8 +9,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -21,6 +19,7 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.scanners.TypeElementsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 import com.rhcloud.mongo.annotation.Document;
 import com.rhcloud.mongo.annotation.Id;
@@ -31,7 +30,7 @@ public class AnnotationScanner {
 	 * 
 	 */
 	
-	private static final Logger log = Logger.getLogger(MongoDBServiceActivator.class.getName());
+	private static final Logger log = Logger.getLogger(AnnotationScanner.class.getName());
 	
 	/**
 	 * startScan
@@ -39,13 +38,14 @@ public class AnnotationScanner {
 
 	public void startScan() {
 		
+		log.info(System.getProperty("java.class.path"));
+		
 		/**
 		 * 
 		 */
 		
 		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
-				.setScanners(new MethodAnnotationsScanner(), 
-						new TypeAnnotationsScanner(), new TypeElementsScanner()));
+				.setScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new TypeElementsScanner()));
 
 		/**
 		 * 

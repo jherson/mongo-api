@@ -26,7 +26,6 @@ public class MongoDBServiceActivator implements ServiceActivator {
 		log.info("Activating MSC service: " + getClass().getName());
 
 		ScannerService service = new ScannerService(new AnnotationScanner());	
-		context.getServiceTarget().addService(SERVICE_NAME, service).install();
-		
+		context.getServiceTarget().addService(SERVICE_NAME, service).install();	
 	}
 }
