@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.mongodb.ReadPreference;
 
-public class MongoDBConfig implements Serializable {
+public class DatastoreConfig implements Serializable {
 
 	/**
 	 * 
@@ -53,7 +53,7 @@ public class MongoDBConfig implements Serializable {
 	 * constructor
 	 */
 	
-	public MongoDBConfig() {
+	public DatastoreConfig() {
 		setReadPreference(ReadPreference.primaryPreferred());
 	}
 	

@@ -12,6 +12,8 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletContext;
+
 import org.bson.types.ObjectId;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
@@ -36,9 +38,7 @@ public class AnnotationScanner {
 	 * startScan
 	 */
 
-	public void startScan() {
-		
-		log.info(System.getProperty("java.class.path"));
+	public Set<Class<?>> startScan() {
 		
 		/**
 		 * 
@@ -53,6 +53,31 @@ public class AnnotationScanner {
 		 */
 		
 		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
+		
+		/**
+		 * return the set of annotated classes
+		 */
+		
+		return annotated;
+
+	}
+	
+	public void startScan(ServletContext servletContext) {
+		
+		/**
+		 * 
+		 */
+		
+		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forWebInfLib(servletContext))
+				.setUrls(ClasspathHelper.forWebInfClasses(servletContext))
+				.filterInputsBy(new FilterBuilder().excludePackage("java").excludePackage("javax"))
+				.setScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new TypeElementsScanner()));
+		
+		/**
+		 * 
+		 */
+		
+        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
 		
 		log.info("MongoDB @Document annotations: " + annotated.size());
 	}

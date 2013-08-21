@@ -7,20 +7,24 @@ import static org.junit.Assert.assertNull;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.rhcloud.mongo.Datastore;
 import com.rhcloud.mongo.DocumentManager;
-import com.rhcloud.mongo.MongoDBConfig;
-import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
+import com.rhcloud.mongo.DatastoreConfig;
+import com.rhcloud.mongo.DocumentManagerFactory;
+import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 import com.rhcloud.mongo.spi.AnnotationScanner;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
 	
-	private static DocumentManager documentManager;
+	private DocumentManagerFactory documentManagerFactory;
+	private DocumentManager documentManager;
 	
 	@Before
 	public void initDB() {
@@ -30,7 +34,7 @@ public class MongoApiTest {
 		final String username = "test";
 		final String password = "test";
 		
-		MongoDBConfig config = new MongoDBConfig();
+		DatastoreConfig config = new DatastoreConfig();
 		config.setHost(host);
 		config.setPort(Integer.decode(port));
 		config.setDatabase(database);
@@ -38,22 +42,20 @@ public class MongoApiTest {
 		config.setPassword(password);
 		
 		try {
-			documentManager = new DocumentManagerFactoryImpl().createDocumentManager(config);
-		} catch (UnknownHostException e) {
+			documentManagerFactory = Datastore.createDocumentManagerFactory(config);
+			documentManager = documentManagerFactory.createDocumentManager();
+
+		} catch (MongoDBConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	@After
-	public void closeDB() {
-		documentManager.close();
-	}
-	
 	@Test
 	public void testScan() {
 		AnnotationScanner scanner = new AnnotationScanner();
-		scanner.startScan();
+		Set<Class<?>> annotatedClasses = scanner.startScan();
+		assertEquals(annotatedClasses.size(), 1);
 	}
 
 	@Test
@@ -82,6 +84,7 @@ public class MongoApiTest {
 	
 	@Test
 	public void testDelete() {
+		
 		MongoTestObject testObject = documentManager.createQuery(MongoTestObject.class).field("name").isEqual("Mongo Test Object").getSingleResult();
 		
 		assertNotNull(testObject);
@@ -89,5 +92,12 @@ public class MongoApiTest {
 		documentManager.delete(testObject);
 		
 		assertNull(documentManager.find(MongoTestObject.class, testObject.getId()));
+	}
+	
+	@After
+	public void closeDB() {
+		System.out.println("closing");
+		
+		documentManagerFactory.close();
 	}
 }
