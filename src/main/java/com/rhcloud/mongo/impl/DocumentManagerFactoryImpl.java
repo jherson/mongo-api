@@ -27,6 +27,12 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	
 	private DB db;
 	
+	/**
+	 * 
+	 */
+	
+	private boolean isOpen;
+	
 	
 	/**
 	 * constructor
@@ -38,6 +44,7 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	public DocumentManagerFactoryImpl(MongoClient mongo, DB db) {
 		this.mongo = mongo;
 		this.db = db;
+		this.isOpen = Boolean.TRUE;
 	}
 
 
@@ -53,11 +60,10 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	@Override
 	public void close() {
 		mongo.close();
-		db = null;
-		mongo = null;
+		isOpen = Boolean.FALSE;
 	}
 	
 	public boolean isOpen() {
-		return mongo != null ? Boolean.TRUE : Boolean.FALSE;
+		return isOpen;
 	}
 }

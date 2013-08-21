@@ -5,12 +5,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.rhcloud.mongo.Datastore;
@@ -23,11 +22,11 @@ import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
 	
-	private DocumentManagerFactory documentManagerFactory;
-	private DocumentManager documentManager;
+	private static DocumentManagerFactory documentManagerFactory;
+	private static DocumentManager documentManager;
 	
-	@Before
-	public void initDB() {
+	@BeforeClass
+	public static void initDB() {
 		final String host = "ds037468.mongolab.com";
 		final String port = "37468";
 		final String database = "apitest"; 
@@ -94,8 +93,8 @@ public class MongoApiTest {
 		assertNull(documentManager.find(MongoTestObject.class, testObject.getId()));
 	}
 	
-	@After
-	public void closeDB() {
+	@AfterClass
+	public static void closeDB() {
 		System.out.println("closing");
 		
 		documentManagerFactory.close();
