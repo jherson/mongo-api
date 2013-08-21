@@ -53,5 +53,11 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	@Override
 	public void close() {
 		mongo.close();
+		db = null;
+		mongo = null;
+	}
+	
+	public boolean isOpen() {
+		return mongo != null ? Boolean.TRUE : Boolean.FALSE;
 	}
 }

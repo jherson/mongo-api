@@ -52,7 +52,7 @@ public class Datastore implements Serializable {
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(DatastoreConfig config) throws MongoDBConfigurationException {
 		
-         if (documentManagerFactory == null) {
+         if (documentManagerFactory == null || ! documentManagerFactory.isOpen()) {
 			
 			log.info("connecting to MongoDB (" + config.getDatabase() +  "@" + config.getHost() + ":" + config.getPort() + ")");
 			

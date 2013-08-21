@@ -11,6 +11,14 @@ public interface DocumentManagerFactory {
 	public DocumentManager createDocumentManager();
 	
 	/**
+	 * isOpen
+	 * 
+	 * @return boolean
+	 */
+	
+	public boolean isOpen();
+	
+	/**
 	 * close
 	 */
 	
