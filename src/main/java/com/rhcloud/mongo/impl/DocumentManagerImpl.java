@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.bson.types.ObjectId;
 
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mongodb.BasicDBObject;
@@ -67,12 +66,6 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * 
 	 */
 	
-	private static Map<Class<?>, String> mapper;
-	
-	/**
-	 * 
-	 */
-	
 	private MongoClient mongo; 
 	
 	/**
@@ -94,11 +87,9 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * @param mongo
 	 */
 	
-	protected DocumentManagerImpl(MongoClient mongo, DB db) {
+	protected DocumentManagerImpl(MongoClient mongo, DB db, Map<Class<?>, String> documentMapper) {
 		this.mongo = mongo;
 		this.db = db;
-		
-		DocumentManagerImpl.mapper = Maps.newConcurrentMap();
 	}
 
 	/**
@@ -130,15 +121,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> T insert(Class<T> clazz, Object object) {
-		String collectionName = null;
-		if (mapper.containsKey(clazz)) {
-			System.out.println("found");
-			collectionName = mapper.get(clazz);
-		} else {
-			System.out.println("not found");
-			collectionName = AnnotationScanner.getCollectionName(object);	
-		}
-		mapper.put(clazz, collectionName);
+		String collectionName = AnnotationResolver.resolveCollection(object);		
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(object);	
 		WriteResult result = collection.insert(dbObject);
@@ -158,16 +141,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> T update(Class<T> clazz, Object object) {		
-		String collectionName = null;
-		if (mapper.containsKey(clazz)) {
-			System.out.println("found");
-			collectionName = mapper.get(clazz);
-		} else {
-			System.out.println("not found");
-			collectionName = AnnotationScanner.getCollectionName(object);	
-		}
-		mapper.put(clazz, collectionName);
-		//String collectionName = AnnotationScanner.getCollectionName(object);
+		String collectionName = AnnotationResolver.resolveCollection(object);		
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(object);
 		WriteResult result = collection.save(dbObject);
@@ -204,7 +178,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> void delete(Class<T> clazz, Object object) {		
-		String collectionName = AnnotationScanner.getCollectionName(object);
+		String collectionName = AnnotationResolver.resolveCollection(object);
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(object);	
 		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
@@ -221,13 +195,26 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> void delete(Object object) {
-		String collectionName = AnnotationScanner.getCollectionName(object);
+		String collectionName = AnnotationResolver.resolveCollection(object);
 		DBCollection collection = getDB().getCollection(collectionName);
-		Object id = AnnotationScanner.getId(object);
+		Object id = AnnotationResolver.resolveId(object);
 		WriteResult wr = collection.remove(new BasicDBObject("_id", id));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}
+	}
+	
+	/**
+	 * deleteAll - removes all documents in a collection
+	 * 
+	 * @param clazz
+	 */
+	
+	@Override
+	public <T> void deleteAll(Class<T> clazz) {
+		String collectionName = AnnotationResolver.resolveCollection(clazz);
+		DBCollection collection = getDB().getCollection(collectionName);
+		collection.remove(new BasicDBObject());
 	}
 	
 	/**

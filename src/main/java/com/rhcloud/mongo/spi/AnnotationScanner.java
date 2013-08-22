@@ -38,27 +38,22 @@ public class AnnotationScanner {
 	 * startScan
 	 */
 
-	public Set<Class<?>> startScan() {
+	public void startScan() {
 		
 		/**
 		 * 
 		 */
 		
-		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
+		new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath())
 				.filterInputsBy(new FilterBuilder().excludePackage("java").excludePackage("javax"))
-				.setScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new TypeElementsScanner()));
+				.setScanners(new TypeAnnotationsScanner(), new MethodAnnotationsScanner(), new TypeElementsScanner())).save("src/test/resources/META-INF/reflections/document-reflections.xml");
 
+		
 		/**
 		 * 
 		 */
-		
-		Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
-		
-		/**
-		 * return the set of annotated classes
-		 */
-		
-		return annotated;
+
+		//scanForDocument();
 
 	}
 	
@@ -77,61 +72,20 @@ public class AnnotationScanner {
 		 * 
 		 */
 		
-        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
+		//scanForDocument(reflections);
 		
-		log.info("MongoDB @Document annotations: " + annotated.size());
 	}
+	
+	private void scanForDocument() {
+		
+		Reflections reflections = Reflections.collect();
 
-	/**
-	 * getCollectionName
-	 * 
-	 * @param clazz
-	 * @return T
-	 */
-	
-	public static <T> String getCollectionName(Object object) {		
-		return getCollectionName(object.getClass());
-	}
-	
-	/**
-	 * getCollectionName
-	 * 
-	 * @param clazz
-	 * @return T
-	 */
-	public static <T> String getCollectionName(Class<T> clazz) {		
-		Annotation annotation = clazz.getAnnotation(Document.class);
-		if (annotation == null) {
-			throw new RuntimeException("Class must be annotated with the Document annotation");
-		}
-		Document document = (Document) annotation;
-		return document.collection();
-	}
-	
-	/**
-	 * getId
-	 * 
-	 * @param object
-	 * @return
-	 */
-	
-	@SuppressWarnings("unchecked")
-	public static <T> Object getId(Object object) {
-		Set<Field> fields = getAllFields(object.getClass(), withAnnotation(Id.class));
-		String idField = fields.iterator().next().getName();
-		String name = "get" + idField.substring(0, 1).toUpperCase() + idField.substring(1);
-		Set<Method> methods = getAllMethods(object.getClass(), withName(name));
-		Object id = null;
-		if (methods.size() > 0) {
-			try {
-				id = methods.iterator().next().invoke(object, new Object[] {});
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-		if (id instanceof ObjectId) {
-			return new ObjectId(id.toString());
-		}
-		return id;
+		/**
+		 * 
+		 */
+		
+        Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
+        log.info("MongoDB @Document annotations: " + annotated.size());
+        
 	}
 }

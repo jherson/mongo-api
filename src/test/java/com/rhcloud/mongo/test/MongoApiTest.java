@@ -6,8 +6,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.util.List;
-import java.util.Set;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,14 +25,19 @@ public class MongoApiTest {
 	
 	private static DocumentManagerFactory documentManagerFactory;
 	private static DocumentManager documentManager;
+	private static MongoTestObject testObject;
 	
 	@BeforeClass
 	public static void initDB() {
-		final String host = "ds037468.mongolab.com";
-		final String port = "37468";
-		final String database = "apitest"; 
-		final String username = "test";
-		final String password = "test";
+		
+		final String host = System.getenv("MONGOLAB_MONGODB_DB_HOST");
+		final String port = System.getenv("MONGOLAB_MONGODB_DB_PORT");
+		final String database = System.getenv("MONGOLAB_MONGODB_DB_NAME"); 
+		final String username = System.getenv("MONGOLAB_MONGODB_DB_USERNAME");
+		final String password = System.getenv("MONGOLAB_MONGODB_DB_PASSWORD");
+		
+		AnnotationScanner scanner = new AnnotationScanner();
+		scanner.startScan();
 		
 		DatastoreConfig config = new DatastoreConfig();
 		config.setHost(host);
@@ -50,24 +56,33 @@ public class MongoApiTest {
 		}
 	}
 	
-	@Test
-	public void testScan() {
-		AnnotationScanner scanner = new AnnotationScanner();
-		Set<Class<?>> annotatedClasses = scanner.startScan();
-		assertEquals(annotatedClasses.size(), 1);
+	@Before
+	public void before() {
+		testObject = new MongoTestObject();
+		testObject.setName("Mongo Test Object");
+	}
+	
+	@After
+	public void after() {
+		documentManager.deleteAll(MongoTestObject.class);
 	}
 
 	@Test
 	public void testInsert() {		
 		
-		MongoTestObject testObject = new MongoTestObject();
-		testObject.setName("Mongo Test Object");
-		
 		testObject = documentManager.insert(MongoTestObject.class, testObject);
 						
-		assertNotNull(testObject.getId());
+		assertNotNull(testObject.getId());		
+	}
+	
+	@Test
+	public void testQuery() {
 		
-		testObject = documentManager.find(MongoTestObject.class, testObject.getId());
+		testObject = documentManager.insert(MongoTestObject.class, testObject);
+		
+		assertNotNull(testObject.getId());		
+		
+        testObject = documentManager.find(MongoTestObject.class, testObject.getId());
 		
 		assertNotNull(testObject);
 		
@@ -75,6 +90,16 @@ public class MongoApiTest {
 		
 		assertNotNull(testObjectList);
 		assertNotEquals(testObjectList.size(), 0);
+	}
+	
+	@Test
+	public void testUpdate() {
+
+		testObject = documentManager.insert(MongoTestObject.class, testObject);
+		
+		assertNotNull(testObject.getId());
+		
+		testObject.setName("Updated");
 		
         testObject = documentManager.update(MongoTestObject.class, testObject);
 		
@@ -84,7 +109,11 @@ public class MongoApiTest {
 	@Test
 	public void testDelete() {
 		
-		MongoTestObject testObject = documentManager.createQuery(MongoTestObject.class).field("name").isEqual("Mongo Test Object").getSingleResult();
+		testObject = documentManager.insert(MongoTestObject.class, testObject);
+		
+		assertNotNull(testObject.getId());		
+		
+		testObject = documentManager.createQuery(MongoTestObject.class).field("name").isEqual("Mongo Test Object").getSingleResult();
 		
 		assertNotNull(testObject);
 		
@@ -94,9 +123,7 @@ public class MongoApiTest {
 	}
 	
 	@AfterClass
-	public static void closeDB() {
-		System.out.println("closing");
-		
+	public static void closeDB() {		
 		documentManagerFactory.close();
 	}
 }

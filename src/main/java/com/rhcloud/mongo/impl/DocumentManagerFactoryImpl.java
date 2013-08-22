@@ -2,10 +2,13 @@ package com.rhcloud.mongo.impl;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.Properties;
 
+import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.google.common.collect.Maps;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
@@ -36,6 +39,12 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	 */
 	
 	private DB db;
+	
+	/**
+	 * 
+	 */
+		
+	private static Map<Class<?>, String> documentMap = Maps.newConcurrentMap();
 	
 	/**
 	 * 
@@ -102,7 +111,8 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	 * @throws MongoDBConfigurationException 
 	 */
 	
-	public DocumentManagerFactoryImpl(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
+	@Produces
+	public DocumentManagerFactory createDocumentManagerFactory(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
 		
 		/**
 		 * get the MongoDBDatastore annotation from the injected class
@@ -131,6 +141,8 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 			config.setDatabase(System.getenv("MONGOLAB_MONGODB_DB_NAME"));
 			config.setUsername(System.getenv("MONGOLAB_MONGODB_DB_USERNAME"));
 			config.setPassword(System.getenv("MONGOLAB_MONGODB_DB_PASSWORD"));
+		} else {
+			System.out.println("no configuration available");
 		}
 		
 		/**
@@ -138,6 +150,8 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		 */
 		
 		initDB(config);
+		
+		return this;
 	}
 
 	/**
@@ -146,7 +160,7 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	
 	@Override
 	public DocumentManager createDocumentManager() {
-		return new DocumentManagerImpl(mongo, db);
+		return new DocumentManagerImpl(mongo, db, documentMap);
 	}
 	
 	@Override

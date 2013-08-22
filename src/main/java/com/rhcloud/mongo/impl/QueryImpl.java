@@ -116,6 +116,6 @@ public class QueryImpl<T> implements Query<T> {
 	 */
 	
 	private DBCollection getDBCollection(Class<T> clazz) {
-		return documentManager.getDB().getCollection(AnnotationScanner.getCollectionName(clazz));
+		return documentManager.getDB().getCollection(AnnotationResolver.resolveCollection(clazz));
 	}
 }
