@@ -7,7 +7,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
 import com.rhcloud.mongo.Query;
-import com.rhcloud.mongo.spi.AnnotationScanner;
 
 /**
  * @author jherson
