@@ -1,4 +1,4 @@
-package com.rhcloud.mongo;
+package com.rhcloud.mongo.db;
 
 import java.io.Serializable;
 import java.util.Properties;
@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
 import com.rhcloud.mongo.qualifier.MongoDBDatastore;
@@ -32,9 +33,7 @@ public class Datastore implements Serializable {
 	
 	private static DocumentManagerFactory documentManagerFactory;
 
-	/**
-	 * createDocumentManagerFactory
-	 * 
+	/**	 
 	 * @return DocumentManagerFactory
 	 * @throws MongoDBConfigurationException
 	 */
@@ -44,8 +43,6 @@ public class Datastore implements Serializable {
 	}
 	
 	/**
-	 * createDocumentManagerFactory
-	 * 
 	 * @param properties
 	 * @return DocumentManagerFactory
 	 * @throws MongoDBConfigurationException
@@ -62,17 +59,13 @@ public class Datastore implements Serializable {
 					Integer.decode(properties.getProperty("mongodb.db.port")),
 					properties.getProperty("mongodb.db.name"),
 					properties.getProperty("mongodb.db.username"),
-					properties.getProperty("mongodb.db.password"));
+					properties.getProperty("mongodb.db.password").toCharArray());
 		}
-		
-		properties = null;
 		
 		return documentManagerFactory;
 	}
 	
 	/**
-	 * createDocumentManagerFactory
-	 * 
 	 * @param config
 	 * @return DocumentManagerFactory
 	 * @throws MongoDBConfigurationException
@@ -89,10 +82,8 @@ public class Datastore implements Serializable {
 					config.getPort(),
 					config.getDatabase(),
 					config.getUsername(),
-					config.getPassword());
+					config.getPassword().toCharArray());
 		}
-		
-		config = null;
 		
 		return documentManagerFactory;
 	}
@@ -133,7 +124,7 @@ public class Datastore implements Serializable {
 		}
 		
 		/**
-		 * initialize the MongoDB instance based for the chosen provider
+		 * initialize the MongoDB instance based on the chosen provider
 		 */
 		
 		return createDocumentManagerFactory(config);

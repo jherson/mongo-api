@@ -1,4 +1,4 @@
-package com.rhcloud.mongo;
+package com.rhcloud.mongo.db;
 
 import java.io.Serializable;
 
@@ -54,7 +54,7 @@ public class DatastoreConfig implements Serializable {
 	 */
 	
 	public DatastoreConfig() {
-		setReadPreference(ReadPreference.primaryPreferred());
+		
 	}
 	
 	/**

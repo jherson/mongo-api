@@ -64,6 +64,12 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * 
 	 */
 	
+	private static final String ID = "_id"; 
+	
+	/**
+	 * 
+	 */
+	
 	private MongoClient mongo; 
 	
 	/**
@@ -162,7 +168,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	@Override
 	public <T> T find(Class<T> clazz, ObjectId id) {
 		return (T) createQuery(clazz)
-				.field("_id")
+				.field(ID)
 				.isEqual(id)
 				.getSingleResult();
 	}
@@ -179,7 +185,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		String collectionName = AnnotationResolver.resolveCollection(object);
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = getAsDBObject(object);	
-		WriteResult wr = collection.remove(new BasicDBObject("_id", new ObjectId(dbObject.get("_id").toString())));
+		WriteResult wr = collection.remove(new BasicDBObject(ID, new ObjectId(dbObject.get(ID).toString())));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}
@@ -196,7 +202,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		String collectionName = AnnotationResolver.resolveCollection(object);
 		DBCollection collection = getDB().getCollection(collectionName);
 		Object id = AnnotationResolver.resolveId(object);
-		WriteResult wr = collection.remove(new BasicDBObject("_id", id));
+		WriteResult wr = collection.remove(new BasicDBObject(ID, id));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}

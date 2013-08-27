@@ -20,19 +20,19 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	protected DocumentManagerImpl documentManager;
+	private DocumentManagerImpl documentManager;
 	
 	/**
 	 * 
 	 */
 	
-	protected Class<T> clazz;
+	private Class<T> clazz;
 	
 	/**
 	 * 
 	 */
 	
-	protected QueryBuilder queryBuilder;
+	private QueryBuilder queryBuilder;
 	
 	/**
 	 * constructor
@@ -61,8 +61,6 @@ public class QueryImpl<T> implements Query<T> {
 	}
 	
 	/**
-	 * isEqual
-	 * 
 	 * @param value
 	 * @return query object 
 	 */
@@ -74,8 +72,6 @@ public class QueryImpl<T> implements Query<T> {
 	}
 	
 	/**
-	 * getSingleResult
-	 * 
 	 * @param clazz
 	 * @return single document that matched the search criteria
 	 */
@@ -86,8 +82,6 @@ public class QueryImpl<T> implements Query<T> {
 	}
 	
 	/**
-	 * getResultList
-	 * 
 	 * @param clazz
 	 * @return list of documents that matched the search criteria
 	 */
@@ -107,9 +101,7 @@ public class QueryImpl<T> implements Query<T> {
 		return queryResult;
 	}
 	
-	/**
-	 * getDBCollection
-	 * 
+	/**	 
 	 * @param clazz
 	 * @return
 	 */

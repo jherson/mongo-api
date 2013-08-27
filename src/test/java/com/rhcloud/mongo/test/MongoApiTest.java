@@ -13,10 +13,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.rhcloud.mongo.Datastore;
 import com.rhcloud.mongo.DocumentManager;
-import com.rhcloud.mongo.DatastoreConfig;
 import com.rhcloud.mongo.DocumentManagerFactory;
+import com.rhcloud.mongo.db.Datastore;
+import com.rhcloud.mongo.db.DatastoreConfig;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 import com.rhcloud.mongo.spi.AnnotationScanner;
 import com.rhcloud.mongo.test.model.MongoTestObject;
