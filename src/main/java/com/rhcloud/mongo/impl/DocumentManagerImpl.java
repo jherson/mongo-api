@@ -20,7 +20,6 @@ package com.rhcloud.mongo.impl;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Map;
 
 import org.bson.types.ObjectId;
 
@@ -38,7 +37,6 @@ import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.Query;
 import com.rhcloud.mongo.adapter.DateTypeAdapter;
 import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
-import com.rhcloud.mongo.spi.AnnotationScanner;
 
 /**
  * @author jherson
@@ -57,7 +55,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * 
 	 */
 	
-	private static final Gson gson = new GsonBuilder().serializeNulls()
+	private static final Gson GSON = new GsonBuilder().serializeNulls()
 			.registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter())
 			.registerTypeAdapter(Date.class, new DateTypeAdapter())
 			.create();
@@ -87,7 +85,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * @param mongo
 	 */
 	
-	protected DocumentManagerImpl(MongoClient mongo, DB db, Map<Class<?>, String> documentMapper) {
+	protected DocumentManagerImpl(MongoClient mongo, DB db) {
 		this.mongo = mongo;
 		this.db = db;
 	}
@@ -240,10 +238,10 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	}
 	
 	protected <T> DBObject getAsDBObject(Object object) {		
-		return (DBObject) JSON.parse(gson.toJson(object));
+		return (DBObject) JSON.parse(GSON.toJson(object));
 	}
 	
 	protected <T> T getAsObject(Class<T> clazz, Object object) {
-		return gson.fromJson(JSON.serialize(object), clazz);
+		return GSON.fromJson(JSON.serialize(object), clazz);
 	}
 }

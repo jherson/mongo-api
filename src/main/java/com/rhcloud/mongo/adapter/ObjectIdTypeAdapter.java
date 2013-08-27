@@ -26,7 +26,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
@@ -47,11 +46,13 @@ public class ObjectIdTypeAdapter implements JsonSerializer<ObjectId>, JsonDeseri
 	 */
 	
 	@Override
-	public ObjectId deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
-		if (jsonElement.isJsonNull())
-			return null;
+	public ObjectId deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) {
+                ObjectId id = null;
+		if (! jsonElement.isJsonNull()) {
+                        id = new ObjectId(jsonElement.getAsJsonObject().get("$oid").getAsString());
+                }
 
-		return new ObjectId(jsonElement.getAsJsonObject().get("$oid").getAsString());
+		return id;
 	}
 	
 	/**

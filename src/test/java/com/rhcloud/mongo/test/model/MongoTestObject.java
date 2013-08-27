@@ -4,8 +4,10 @@ import java.util.Date;
 
 import com.rhcloud.mongo.model.BaseDocument;
 import com.rhcloud.mongo.annotation.Document;
+import com.rhcloud.mongo.annotation.Index;
 
 @Document(collection = "TestObjects")
+@Index(name="testindex", key = "name")
 public class MongoTestObject extends BaseDocument {
 		
 	/**

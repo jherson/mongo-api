@@ -32,7 +32,7 @@ public class AnnotationScanner {
 	 * 
 	 */
 	
-	private static final Logger log = Logger.getLogger(AnnotationScanner.class.getName());
+	private static final Logger LOG = Logger.getLogger(AnnotationScanner.class.getName());
 	
 	/**
 	 * startScan
@@ -85,7 +85,7 @@ public class AnnotationScanner {
 		 */
 		
         Set<Class<?>> annotated = reflections.getTypesAnnotatedWith(Document.class);
-        log.info("MongoDB @Document annotations: " + annotated.size());
+        LOG.info("MongoDB @Document annotations: " + annotated.size());
         
 	}
 }

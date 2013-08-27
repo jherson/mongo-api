@@ -34,7 +34,7 @@ public interface DocumentManager {
 	 * @param db
 	 */
 	
-	public void setDB(DB db);
+	void setDB(DB db);
 	
 	/**
 	 * insert
@@ -43,7 +43,7 @@ public interface DocumentManager {
 	 * @return T
 	 */
 	
-	public <T> T insert(Class<T> clazz, Object object);
+	<T> T insert(Class<T> clazz, Object object);
 	
 	/**
 	 * update
@@ -53,7 +53,7 @@ public interface DocumentManager {
 	 * @return T
 	 */
 	
-	public <T> T update(Class<T> clazz, Object object);
+	<T> T update(Class<T> clazz, Object object);
 	
 	/**
 	 * delete
@@ -62,7 +62,7 @@ public interface DocumentManager {
 	 * @param object
 	 */
 	
-	public <T> void delete(Class<T> clazz, Object object);
+	<T> void delete(Class<T> clazz, Object object);
 
 	/**
 	 * delete
@@ -70,7 +70,7 @@ public interface DocumentManager {
 	 * @param clazz
 	 */
 	
-	public <T> void delete(Object object);
+	<T> void delete(Object object);
 	
 	/**
 	 * delete
@@ -78,7 +78,7 @@ public interface DocumentManager {
 	 * @param clazz
 	 */
 	
-	public <T> void deleteAll(Class<T> clazz);
+	<T> void deleteAll(Class<T> clazz);
 	
 	/**
 	 * find
@@ -88,7 +88,7 @@ public interface DocumentManager {
 	 * @return T
 	 */
 	
-	public <T> T find(Class<T> clazz, ObjectId id);	
+	<T> T find(Class<T> clazz, ObjectId id);	
 	
 	/**
 	 * createQuery
@@ -97,11 +97,11 @@ public interface DocumentManager {
 	 * @return Query
 	 */
 	
-	public <T> Query<T> createQuery(Class<T> clazz);
+	<T> Query<T> createQuery(Class<T> clazz);
 	
 	/**
 	 * close
 	 */
 	
-	public void close();
+	void close();
 }

@@ -3,8 +3,8 @@
 	<groupId>com.rhcloud.mongodb</groupId>
 	<artifactId>mongodb-persistence-api</artifactId>
 	<version>0.2.3-SNAPSHOT</version>
-	<name>Mongo API</name>
-	<description>Lightweight set of APIs for MongoDB</description>
+	<name>MongoDB persistence API</name>
+	<description>Lightweight set of J2EE compliant APIs for MongoDB</description>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -81,8 +81,23 @@
 	</dependencies>
 
 	<build>
+<pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>2.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<plugins>
+<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>

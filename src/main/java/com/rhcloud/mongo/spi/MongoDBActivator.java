@@ -13,7 +13,7 @@ public class MongoDBActivator implements ServletContextListener  {
 	 * 
 	 */
 	
-	private static final Logger log = Logger.getLogger(MongoDBActivator.class.getName());
+	private static final Logger LOG = Logger.getLogger(MongoDBActivator.class.getName());
 	
 	/**
 	 * 
@@ -21,7 +21,7 @@ public class MongoDBActivator implements ServletContextListener  {
 
 	@Override
 	public void contextInitialized(ServletContextEvent contextEvent) {		
-		log.info("Starting MongoDB...Scanning for Documents");
+		LOG.info("Starting MongoDB...Scanning for Documents");
 		
 		/**
 		 * initizlize the AnnotationScanner

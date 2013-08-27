@@ -16,8 +16,11 @@ import java.util.Set;
 import org.bson.types.ObjectId;
 
 import com.google.common.collect.Maps;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.rhcloud.mongo.annotation.Document;
 import com.rhcloud.mongo.annotation.Id;
+import com.rhcloud.mongo.annotation.Index;
 
 public class AnnotationResolver implements Serializable {
 	
@@ -46,6 +49,20 @@ public class AnnotationResolver implements Serializable {
 			documentMap.put(clazz, collectionName);
 		}
 		return collectionName;
+	}
+	
+	public static <T> DBObject resolveIndexes(Object object) {		
+		DBObject dbObject = null;
+		Annotation[] annotations = object.getClass().getAnnotations();
+		for (Annotation annotation : annotations) {
+			if (annotation instanceof Index) {
+				if (dbObject == null) {
+					dbObject = new BasicDBObject();
+				}
+				dbObject.put(((Index) annotation).key(), ((Index) annotation).acsending());
+			}
+		}
+		return dbObject;
 	}
 	
 	/**

@@ -50,14 +50,15 @@ public class DateTypeAdapter implements JsonSerializer<Date>, JsonDeserializer<D
 	 */
 	
 	@Override
-	public Date deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {				
+	public Date deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) {				
 		SimpleDateFormat format = new SimpleDateFormat(ISO_8061_FORMAT);
 		format.setTimeZone(TimeZone.getTimeZone("UTC"));
-		try {
-			return format.parse(jsonElement.getAsJsonObject().get("$date").getAsString());
-		} catch (ParseException e) {
-			throw new JsonParseException(e);
-		}
+                try {
+		    return format.parse(jsonElement.getAsJsonObject().get("$date").getAsString());
+                } catch (ParseException e) {
+                    throw new JsonParseException(e);
+                }
+
 	}
 
 	/**

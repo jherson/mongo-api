@@ -1,14 +1,14 @@
 package com.rhcloud.mongo;
 
 public interface DocumentManagerFactory {
-
+	
 	/**
 	 * createDocumentManager
 	 * 
-	 * @return
+	 * @return DocumentManager
 	 */
 	
-	public DocumentManager createDocumentManager();
+	DocumentManager createDocumentManager();
 	
 	/**
 	 * isOpen
@@ -16,11 +16,11 @@ public interface DocumentManagerFactory {
 	 * @return boolean
 	 */
 	
-	public boolean isOpen();
+	boolean isOpen();
 	
 	/**
 	 * close
 	 */
 	
-	public void close();
+	void close();
 }

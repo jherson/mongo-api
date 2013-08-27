@@ -49,7 +49,7 @@ public abstract class BaseDocument implements Serializable {
 	 * 
 	 */
 	
-	private static final Gson gson = new GsonBuilder().			
+	private static final Gson GSON = new GsonBuilder().			
 			serializeNulls().	
 			registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter()).
 			registerTypeAdapter(Date.class, new DateTypeAdapter()).
@@ -77,7 +77,7 @@ public abstract class BaseDocument implements Serializable {
 	 */
 	
 	public BaseDocument(String json) {
-		gson.fromJson(json, this.getClass());
+		GSON.fromJson(json, this.getClass());
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public abstract class BaseDocument implements Serializable {
 	 */
 	
 	public BaseDocument(DBObject dbObject) {
-		gson.fromJson(JSON.serialize(dbObject), this.getClass());
+		GSON.fromJson(JSON.serialize(dbObject), this.getClass());
 	}
 	
 	/**
@@ -114,7 +114,7 @@ public abstract class BaseDocument implements Serializable {
 	 */
 	
 	public String getAsJSON() {
-		return gson.toJson(this);
+		return GSON.toJson(this);
 	}	
 	
 	/**
@@ -124,6 +124,6 @@ public abstract class BaseDocument implements Serializable {
 	 */
 	
 	public DBObject getAsDBObject() {
-		return (DBObject) JSON.parse(gson.toJson(this));
+		return (DBObject) JSON.parse(GSON.toJson(this));
 	}
 }

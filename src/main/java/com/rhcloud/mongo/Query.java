@@ -11,7 +11,7 @@ public interface Query<T> {
 	 * @return Query
 	 */
 	
-	public Query<T> field(String key);
+	Query<T> field(String key);
 	
 	/**
 	 * is
@@ -20,7 +20,7 @@ public interface Query<T> {
 	 * @return Query
 	 */
 	
-	public Query<T> isEqual(Object value);
+	Query<T> isEqual(Object value);
 	
 	/**
 	 * getSingleResult
@@ -29,7 +29,7 @@ public interface Query<T> {
 	 * @return T
 	 */
 	
-	public T getSingleResult();
+	T getSingleResult();
 	
 	/**
 	 * 
@@ -37,5 +37,5 @@ public interface Query<T> {
 	 * @return List<T>
 	 */
 	
-	public List<T> getResultList();
+	List<T> getResultList();
 }
