@@ -2,8 +2,17 @@ package com.rhcloud.mongo.db;
 
 import java.io.Serializable;
 
-import com.mongodb.ReadPreference;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.mongodb.ReadPreference;
+import com.rhcloud.mongo.adapter.XmlStringTypeAdapter;
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class DatastoreConfig implements Serializable {
 
 	/**
@@ -16,36 +25,48 @@ public class DatastoreConfig implements Serializable {
 	 * 
 	 */
 	
+	@XmlElement(name="mongodb-db-host")
+	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private String host;
 	
 	/**
 	 * 
 	 */
 	
+	@XmlElement(name="mongodb-db-name")
+	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private String database;
 	
 	/**
 	 * 
 	 */
 	
+	@XmlElement(name="mongodb-db-port")
+	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private int port;
 	
 	/**
 	 * 
 	 */
 	
+	@XmlElement(name="mongodb-db-username")
+	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private String username;
 	
 	/**
 	 * 
 	 */
 	
+	@XmlElement(name="mongodb-db-password")
+	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private String password;
 	
 	/**
 	 * 
 	 */
 	
+	@XmlElement(name="readPreference")
+	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private ReadPreference readPreference;
 	
 	

@@ -1,11 +1,16 @@
 package com.rhcloud.mongo.db;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
@@ -39,7 +44,7 @@ public class Datastore implements Serializable {
 	 */
 	
 	public static DocumentManagerFactory createDocumentManagerFactory() throws MongoDBConfigurationException {
-		return null;
+		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb-config.xml").getFile());
 	}
 	
 	/**
@@ -86,6 +91,33 @@ public class Datastore implements Serializable {
 		}
 		
 		return documentManagerFactory;
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @return DocumentManagerFactory
+	 * @throws MongoDBConfigurationException
+	 */
+	
+	public static DocumentManagerFactory createDocumentManagerFactory(String file) throws MongoDBConfigurationException {
+		
+		LOG.info("createDocumentManagerFactory: Config File");
+		
+		DatastoreConfig config = null;
+		try {
+			JAXBContext context = JAXBContext.newInstance(DatastoreConfig.class);
+			Unmarshaller u = context.createUnmarshaller();
+			config = (DatastoreConfig) u.unmarshal(new FileInputStream(file));
+		} catch (JAXBException e) {
+			LOG.severe(e.getMessage());
+			throw new MongoDBConfigurationException(e);
+		} catch (FileNotFoundException e) {
+			LOG.severe(e.getMessage());
+			throw new MongoDBConfigurationException(e);
+		} 
+		
+		return createDocumentManagerFactory(config);
 	}
 	
 	@Produces

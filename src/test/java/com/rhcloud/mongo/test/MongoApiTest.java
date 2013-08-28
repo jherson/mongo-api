@@ -18,7 +18,6 @@ import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.db.Datastore;
 import com.rhcloud.mongo.db.DatastoreConfig;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
-import com.rhcloud.mongo.spi.AnnotationScanner;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
@@ -36,9 +35,6 @@ public class MongoApiTest {
 		final String username = System.getenv("MONGOLAB_MONGODB_DB_USERNAME");
 		final String password = System.getenv("MONGOLAB_MONGODB_DB_PASSWORD");
 		
-		AnnotationScanner scanner = new AnnotationScanner();
-		scanner.startScan();
-		
 		DatastoreConfig config = new DatastoreConfig();
 		config.setHost(host);
 		config.setPort(Integer.decode(port));
@@ -47,7 +43,10 @@ public class MongoApiTest {
 		config.setPassword(password);
 		
 		try {
-			documentManagerFactory = Datastore.createDocumentManagerFactory(config);
+			//documentManagerFactory = Datastore.createDocumentManagerFactory(config);
+			
+			String file = MongoApiTest.class.getClass().getResource("/META-INF/mongodb-config.xml").getFile();
+			documentManagerFactory = Datastore.createDocumentManagerFactory(file);
 			documentManager = documentManagerFactory.createDocumentManager();
 
 		} catch (MongoDBConfigurationException e) {

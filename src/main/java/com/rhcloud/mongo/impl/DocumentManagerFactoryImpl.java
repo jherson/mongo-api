@@ -56,13 +56,13 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	 * @throws MongoDBConfigurationException
 	 */
 	
-	public DocumentManagerFactoryImpl(String host, int port, String databaseName, String username, char[] password) throws MongoDBConfigurationException {
+	public DocumentManagerFactoryImpl(String host, int port, String database, String username, char[] password) throws MongoDBConfigurationException {
 		
 		/**
 		 * 
 		 */
 		
-		LOG.info("Connecting to MongoDB...(" + databaseName + "@" + host + ":" + port + ")");
+		LOG.info("Connecting to MongoDB...(" + database + "@" + host + ":" + port + ")");
 		
 		/**
 		 * configure the MongoClient
@@ -84,7 +84,7 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		 * log into the DB
 		 */
 		
-		db = mongo.getDB(databaseName);
+		db = mongo.getDB(database);
 		
 		/**
 		 * handle authentication failure
