@@ -42,7 +42,6 @@ public class DatastoreConfig implements Serializable {
 	 */
 	
 	@XmlElement(name="mongodb-db-port")
-	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private int port;
 	
 	/**
@@ -66,7 +65,6 @@ public class DatastoreConfig implements Serializable {
 	 */
 	
 	@XmlElement(name="readPreference")
-	@XmlJavaTypeAdapter(XmlStringTypeAdapter.class)
 	private ReadPreference readPreference;
 	
 	
