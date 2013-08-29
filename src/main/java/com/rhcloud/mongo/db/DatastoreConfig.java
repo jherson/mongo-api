@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.mongodb.ReadPreference;
+import com.rhcloud.mongo.adapter.XmlIntegerTypeAdapter;
 import com.rhcloud.mongo.adapter.XmlStringTypeAdapter;
 
 @XmlRootElement
@@ -42,7 +43,8 @@ public class DatastoreConfig implements Serializable {
 	 */
 	
 	@XmlElement(name="mongodb-db-port")
-	private int port;
+	@XmlJavaTypeAdapter(XmlIntegerTypeAdapter.class)
+	private Integer port;
 	
 	/**
 	 * 
@@ -121,7 +123,7 @@ public class DatastoreConfig implements Serializable {
 	 * @return port
 	 */
 	
-	public int getPort() {
+	public Integer getPort() {
 		return port;
 	}
 	
@@ -131,7 +133,7 @@ public class DatastoreConfig implements Serializable {
 	 * @param port
 	 */
 	
-	public void setPort(int port) {
+	public void setPort(Integer port) {
 		this.port = port;
 	}
 	

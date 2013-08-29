@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.xml.bind.JAXBContext;
@@ -55,19 +56,18 @@ public class Datastore implements Serializable {
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(Properties properties) throws MongoDBConfigurationException {
 		
-		LOG.info("createDocumentManagerFactory: Properties");
-		
-		if (documentManagerFactory == null || ! documentManagerFactory.isOpen()) {
-			
-			documentManagerFactory = new DocumentManagerFactoryImpl(
-					properties.getProperty("mongodb.db.host"),
-					Integer.decode(properties.getProperty("mongodb.db.port")),
-					properties.getProperty("mongodb.db.name"),
-					properties.getProperty("mongodb.db.username"),
-					properties.getProperty("mongodb.db.password").toCharArray());
+		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
+			return documentManagerFactory;
 		}
+					
+		DatastoreConfig config = new DatastoreConfig();
+		config.setHost(System.getenv("mongodb.db.host"));
+		config.setPort(Integer.decode(System.getenv("mongodb.db.port")));
+		config.setDatabase(System.getenv("mongodb.db.name"));
+		config.setUsername(System.getenv("mongodb.db.username"));
+		config.setPassword(System.getenv("mongodb.db.password"));			
 		
-		return documentManagerFactory;
+		return createDocumentManagerFactory(config);
 	}
 	
 	/**
@@ -78,19 +78,11 @@ public class Datastore implements Serializable {
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(DatastoreConfig config) throws MongoDBConfigurationException {
 		
-		LOG.info("createDocumentManagerFactory: DatastoreConfig");
-		
-		if (documentManagerFactory == null || ! documentManagerFactory.isOpen()) {		
-			
-			documentManagerFactory = new DocumentManagerFactoryImpl(
-					config.getHost(),
-					config.getPort(),
-					config.getDatabase(),
-					config.getUsername(),
-					config.getPassword().toCharArray());
+		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
+			return documentManagerFactory;
 		}
-		
-		return documentManagerFactory;
+	
+		return new DocumentManagerFactoryImpl(config);
 	}
 	
 	/**
@@ -102,7 +94,9 @@ public class Datastore implements Serializable {
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(String file) throws MongoDBConfigurationException {
 		
-		LOG.info("createDocumentManagerFactory: Config File");
+		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
+			return documentManagerFactory;
+		}
 		
 		DatastoreConfig config = null;
 		try {
@@ -121,7 +115,12 @@ public class Datastore implements Serializable {
 	}
 	
 	@Produces
+	@ApplicationScoped
 	public DocumentManagerFactory createDocumentManagerFactory(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
+		
+		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
+			return documentManagerFactory;
+		}
 		
 		/**
 		 * get the MongoDBDatastore annotation from the injected class

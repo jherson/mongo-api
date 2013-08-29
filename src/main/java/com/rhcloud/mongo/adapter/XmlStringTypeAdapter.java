@@ -12,9 +12,8 @@ public class XmlStringTypeAdapter extends XmlAdapter<String,String> {
 	@Override
 	public String unmarshal(String value) throws Exception {
         if (value.startsWith("${env.")) {
-        	return System.getenv(value.replace("${env.", "").replace('}', ' ').trim());
-        } else {
-        	return value;
-        }
+        	value = System.getenv(value.replace("${env.", "").replace('}', ' ').trim());
+        } 
+        return value;
 	}
 }

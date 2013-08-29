@@ -2,7 +2,6 @@ package com.rhcloud.mongo.impl;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
 import com.mongodb.DB;
@@ -12,6 +11,7 @@ import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.DocumentManagerFactory;
+import com.rhcloud.mongo.db.DatastoreConfig;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 
 public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Serializable {
@@ -46,30 +46,27 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	
 	private boolean isOpen;
 	
+	
 	/**
 	 * 
-	 * @param host
-	 * @param port
-	 * @param databaseName
-	 * @param username
-	 * @param password
+	 * @param config
 	 * @throws MongoDBConfigurationException
 	 */
 	
-	public DocumentManagerFactoryImpl(String host, int port, String database, String username, char[] password) throws MongoDBConfigurationException {
+	public DocumentManagerFactoryImpl(DatastoreConfig config) throws MongoDBConfigurationException {
 		
 		/**
 		 * 
 		 */
 		
-		LOG.info("Connecting to MongoDB...(" + database + "@" + host + ":" + port + ")");
+		LOG.info("Connecting to MongoDB...(" + config.getDatabase() + "@" + config.getHost() + ":" + config.getPort() + ")");
 		
 		/**
 		 * configure the MongoClient
 		 */
 		
 		try {
-			mongo = new MongoClient(new ServerAddress(host, port));
+			mongo = new MongoClient(new ServerAddress(config.getHost(), config.getPort()));
 		} catch (UnknownHostException e) {
 			throw new MongoDBConfigurationException(e);
 		}		
@@ -84,21 +81,15 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		 * log into the DB
 		 */
 		
-		db = mongo.getDB(database);
+		db = mongo.getDB(config.getDatabase());
 		
 		/**
 		 * handle authentication failure
 		 */
 		
-		if (!db.authenticate(username, password)) {
+		if (!db.authenticate(config.getUsername(), config.getPassword().toCharArray())) {
 			throw new MongoException(String.format("Failed to authenticate against db: %s", db));
 		}
-		
-		/**
-		 * clear password
-		 */
-		
-		Arrays.fill(password, '*');
 		
 		/**
 		 * 
