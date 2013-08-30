@@ -16,5 +16,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Documented
 public @interface MongoDBDatastore {
-	Provider provider() default Provider.OPENSHIFT;
+    String name();
 }

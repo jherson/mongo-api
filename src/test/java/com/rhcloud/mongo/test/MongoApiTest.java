@@ -16,7 +16,6 @@ import org.junit.Test;
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.db.Datastore;
-import com.rhcloud.mongo.db.DatastoreConfig;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
@@ -29,24 +28,8 @@ public class MongoApiTest {
 	@BeforeClass
 	public static void initDB() {
 		
-		final String host = System.getenv("MONGOLAB_MONGODB_DB_HOST");
-		final String port = System.getenv("MONGOLAB_MONGODB_DB_PORT");
-		final String database = System.getenv("MONGOLAB_MONGODB_DB_NAME"); 
-		final String username = System.getenv("MONGOLAB_MONGODB_DB_USERNAME");
-		final String password = System.getenv("MONGOLAB_MONGODB_DB_PASSWORD");
-		
-		DatastoreConfig config = new DatastoreConfig();
-		config.setHost(host);
-		config.setPort(Integer.decode(port));
-		config.setDatabase(database);
-		config.setUsername(username);
-		config.setPassword(password);
-		
-		try {
-			//documentManagerFactory = Datastore.createDocumentManagerFactory(config);
-			
-			String file = MongoApiTest.class.getClass().getResource("/META-INF/mongodb-config.xml").getFile();
-			documentManagerFactory = Datastore.createDocumentManagerFactory(file);
+		try {			
+			documentManagerFactory = Datastore.createDocumentManagerFactory("mongolab");
 			documentManager = documentManagerFactory.createDocumentManager();
 
 		} catch (MongoDBConfigurationException e) {

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<datastoreConfig>
-	<mongodb-db-host>${env.MONGOLAB_MONGODB_DB_HOST}</mongodb-db-host>
-	<mongodb-db-port>${env.MONGOLAB_MONGODB_DB_PORT}</mongodb-db-port>
-	<mongodb-db-name>${env.MONGOLAB_MONGODB_DB_NAME}</mongodb-db-name>
-	<mongodb-db-username>${env.MONGOLAB_MONGODB_DB_USERNAME}</mongodb-db-username>
-	<mongodb-db-password>${env.MONGOLAB_MONGODB_DB_PASSWORD}</mongodb-db-password>
-</datastoreConfig>

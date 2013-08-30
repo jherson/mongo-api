@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datastores>
+	<datastore name="mongolab">
+		<properties>
+			<property name="mongodb.db.host" value="${env.MONGOLAB_MONGODB_DB_HOST}" />
+			<property name="mongodb.db.port" value="${env.MONGOLAB_MONGODB_DB_PORT}" />
+			<property name="mongodb.db.name" value="${env.MONGOLAB_MONGODB_DB_NAME}" />
+			<property name="mongodb.db.username" value="${env.MONGOLAB_MONGODB_DB_USERNAME}" />
+			<property name="mongodb.db.password" value="${env.MONGOLAB_MONGODB_DB_PASSWORD}" />
+		</properties>
+	</datastore>
+</datastores>

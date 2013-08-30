@@ -1,23 +1,27 @@
 package com.rhcloud.mongo.db;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
 import com.rhcloud.mongo.qualifier.MongoDBDatastore;
-import com.rhcloud.mongo.qualifier.Provider;
 
 public class Datastore implements Serializable {
 
@@ -38,6 +42,14 @@ public class Datastore implements Serializable {
 	 */
 	
 	private static DocumentManagerFactory documentManagerFactory;
+	
+	/**
+	 * 
+	 */
+	
+	private Datastore() {
+		
+	}
 
 	/**	 
 	 * @return DocumentManagerFactory
@@ -45,7 +57,18 @@ public class Datastore implements Serializable {
 	 */
 	
 	public static DocumentManagerFactory createDocumentManagerFactory() throws MongoDBConfigurationException {
-		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb-config.xml").getFile());
+		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb.cfg.xml").getFile(), "openshift");
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @return
+	 * @throws MongoDBConfigurationException
+	 */
+	
+	public static DocumentManagerFactory createDocumentManagerFactory(String name) throws MongoDBConfigurationException {
+		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb.cfg.xml").getFile(), name);
 	}
 	
 	/**
@@ -61,11 +84,11 @@ public class Datastore implements Serializable {
 		}
 					
 		DatastoreConfig config = new DatastoreConfig();
-		config.setHost(System.getenv("mongodb.db.host"));
-		config.setPort(Integer.decode(System.getenv("mongodb.db.port")));
-		config.setDatabase(System.getenv("mongodb.db.name"));
-		config.setUsername(System.getenv("mongodb.db.username"));
-		config.setPassword(System.getenv("mongodb.db.password"));			
+		config.setHost(properties.getProperty("mongodb.db.host"));
+		config.setPort(Integer.decode(properties.getProperty("mongodb.db.port")));
+		config.setDatabase(properties.getProperty("mongodb.db.name"));
+		config.setUsername(properties.getProperty("mongodb.db.username"));
+		config.setPassword(properties.getProperty("mongodb.db.password"));			
 		
 		return createDocumentManagerFactory(config);
 	}
@@ -88,35 +111,45 @@ public class Datastore implements Serializable {
 	/**
 	 * 
 	 * @param file
-	 * @return DocumentManagerFactory
+	 * @param name
+	 * @return
 	 * @throws MongoDBConfigurationException
 	 */
 	
-	public static DocumentManagerFactory createDocumentManagerFactory(String file) throws MongoDBConfigurationException {
+	public static DocumentManagerFactory createDocumentManagerFactory(String file, String name) throws MongoDBConfigurationException {
 		
 		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
 			return documentManagerFactory;
 		}
 		
-		DatastoreConfig config = null;
+		Properties properties = null;
+		
+		File xmlFile = new File(file);
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = null;
 		try {
-			JAXBContext context = JAXBContext.newInstance(DatastoreConfig.class);
-			Unmarshaller u = context.createUnmarshaller();
-			config = (DatastoreConfig) u.unmarshal(new FileInputStream(file));
-		} catch (JAXBException e) {
-			LOG.severe(e.getMessage());
-			throw new MongoDBConfigurationException(e);
-		} catch (FileNotFoundException e) {
+			builder = factory.newDocumentBuilder();
+			Document document = builder.parse(xmlFile);
+			NodeList nodeList = document.getElementsByTagName("datastore");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) node;
+					if (element.getAttribute("name").equals(name)) {
+						properties = parseProperties(element.getElementsByTagName("properties"));
+					}
+				}
+			}
+		} catch (ParserConfigurationException | SAXException | IOException e) {
 			LOG.severe(e.getMessage());
 			throw new MongoDBConfigurationException(e);
 		} 
 		
-		return createDocumentManagerFactory(config);
+		return createDocumentManagerFactory(properties);
 	}
 	
 	@Produces
-	@ApplicationScoped
-	public DocumentManagerFactory createDocumentManagerFactory(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
+	public static DocumentManagerFactory createDocumentManagerFactory(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
 		
 		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
 			return documentManagerFactory;
@@ -129,35 +162,48 @@ public class Datastore implements Serializable {
 		MongoDBDatastore datastore = injectionPoint.getAnnotated().getAnnotation(MongoDBDatastore.class);
 		
 		/**
-		 * build the config 
+		 * get the default mongodb.cfg.xml file from the META-INF folder
 		 */
 		
-		DatastoreConfig config = new DatastoreConfig();
+		//String file = Thread.currentThread().getContextClassLoader().getResource("/META-INF/mongodb.cfg.xml").getFile();
 		
 		/**
-		 * use environment variables to build the Datastore config
+		 * create the DocumentManagerFactory based on the default config
 		 */
 		
-		if (datastore.provider().equals(Provider.OPENSHIFT)) {
-			config.setHost(System.getenv("OPENSHIFT_MONGODB_DB_HOST"));
-			config.setPort(Integer.decode(System.getenv("OPENSHIFT_MONGODB_DB_PORT")));
-			config.setDatabase(System.getenv("OPENSHIFT_APP_NAME"));
-			config.setUsername(System.getenv("OPENSHIFT_MONGODB_DB_USERNAME"));
-			config.setPassword(System.getenv("OPENSHIFT_MONGODB_DB_PASSWORD"));
-		} else if (datastore.provider().equals(Provider.MONGOLAB)) {
-			config.setHost(System.getenv("MONGOLAB_MONGODB_DB_HOST"));
-			config.setPort(Integer.decode(System.getenv("MONGOLAB_MONGODB_DB_PORT")));
-			config.setDatabase(System.getenv("MONGOLAB_MONGODB_DB_NAME"));
-			config.setUsername(System.getenv("MONGOLAB_MONGODB_DB_USERNAME"));
-			config.setPassword(System.getenv("MONGOLAB_MONGODB_DB_PASSWORD"));
-		} else {
-			LOG.severe("no configuration available");
+		return createDocumentManagerFactory(datastore.name());
+	}
+	
+	/**
+	 * 
+	 * @param nodeList
+	 * @return
+	 */
+	
+	private static Properties parseProperties(NodeList nodeList) {
+		Properties properties = new Properties();
+		for (int j = 0; j < nodeList.item(0).getChildNodes().getLength(); j++) {
+			Node node = nodeList.item(0).getChildNodes().item(j);
+			if (node.getNodeType() == Node.ELEMENT_NODE) {
+				Element property = (Element) node;
+				properties.put(property.getAttribute("name"), parsePropertyValue(property.getAttribute("value")));
+			}
 		}
-		
-		/**
-		 * initialize the MongoDB instance based on the chosen provider
-		 */
-		
-		return createDocumentManagerFactory(config);
+		return properties;
+	}
+	
+	/**
+	 * 
+	 * @param value
+	 * @return
+	 */
+	
+	private static String parsePropertyValue(String value) {
+		if (value.startsWith("${env.")) {
+        	value = System.getenv(value.replace("${env.", "").replace('}', ' ').trim());
+        } else if (value.startsWith("${property.")) {
+        	value = System.getProperty(value.replace("${property.", "").replace('}', ' ').trim());
+        }
+		return value;
 	}
 }
