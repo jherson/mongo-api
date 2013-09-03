@@ -3,15 +3,26 @@ package com.rhcloud.mongo.db;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.faces.context.FacesContext;
+import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -162,16 +173,33 @@ public class Datastore implements Serializable {
 		MongoDBDatastore datastore = injectionPoint.getAnnotated().getAnnotation(MongoDBDatastore.class);
 		
 		/**
-		 * get the default mongodb.cfg.xml file from the META-INF folder
+		 * load configuration from the mongodb.cfg.xml file from the META-INF folder
 		 */
 		
-		//String file = Thread.currentThread().getContextClassLoader().getResource("/META-INF/mongodb.cfg.xml").getFile();
+		LOG.info("loading configuration file from FacesContext: /mongodb.cfg.xml");
+		
+		ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+		
+		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forWebInfClasses(servletContext))
+				.setScanners(new ResourcesScanner()));
+		
+		Set<String> configFiles = reflections.getResources(Pattern.compile(".*\\.cfg\\.xml"));
+		
+		LOG.info(String.valueOf(configFiles.size()));
+		
+		
+		String file = null;
+		try {
+			file = FacesContext.getCurrentInstance().getExternalContext().getResource("mongodb.cfg.xml").getFile();
+		} catch (MalformedURLException e) {
+			throw new MongoDBConfigurationException(e);
+		}
 		
 		/**
 		 * create the DocumentManagerFactory based on the default config
 		 */
 		
-		return createDocumentManagerFactory(datastore.name());
+		return createDocumentManagerFactory(file, datastore.name());
 	}
 	
 	/**
