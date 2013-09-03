@@ -3,7 +3,6 @@ package com.rhcloud.mongo.db;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -19,10 +18,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-import org.reflections.scanners.Scanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -176,7 +173,7 @@ public class Datastore implements Serializable {
 		 * load configuration from the mongodb.cfg.xml file from the META-INF folder
 		 */
 		
-		LOG.info("loading configuration file from FacesContext: /mongodb.cfg.xml");
+		LOG.info("searching WEB-INF for configuration file: mongodb.cfg.xml");
 		
 		ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
 		
@@ -185,15 +182,19 @@ public class Datastore implements Serializable {
 		
 		Set<String> configFiles = reflections.getResources(Pattern.compile(".*\\.cfg\\.xml"));
 		
-		LOG.info(String.valueOf(configFiles.size()));
+		LOG.info("number of mongodb.cfg.xml configuration files found: " + String.valueOf(configFiles.size()));
 		
-		
-		String file = null;
-		try {
-			file = FacesContext.getCurrentInstance().getExternalContext().getResource("mongodb.cfg.xml").getFile();
-		} catch (MalformedURLException e) {
-			throw new MongoDBConfigurationException(e);
+		if (configFiles.size() == 0) {
+			throw new MongoDBConfigurationException();
 		}
+		
+		if (configFiles.size() > 1) {
+			throw new MongoDBConfigurationException(configFiles.size() + " configuration files found. Only one mongodb.cfg.xml is allowed.");
+		}		
+		
+		String file = configFiles.iterator().next();
+		
+		LOG.info("configuration file: " + file);
 		
 		/**
 		 * create the DocumentManagerFactory based on the default config
@@ -210,8 +211,8 @@ public class Datastore implements Serializable {
 	
 	private static Properties parseProperties(NodeList nodeList) {
 		Properties properties = new Properties();
-		for (int j = 0; j < nodeList.item(0).getChildNodes().getLength(); j++) {
-			Node node = nodeList.item(0).getChildNodes().item(j);
+		for (int i = 0; i < nodeList.item(0).getChildNodes().getLength(); i++) {
+			Node node = nodeList.item(0).getChildNodes().item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element property = (Element) node;
 				properties.put(property.getAttribute("name"), parsePropertyValue(property.getAttribute("value")));

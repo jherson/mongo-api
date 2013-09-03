@@ -15,7 +15,11 @@ public class MongoDBConfigurationException extends Exception {
 		super("MongoDB Configuration is invalid or missing.");
 	}
 	
-	public MongoDBConfigurationException(Exception e) {
-		super(e);
+	public MongoDBConfigurationException(String message) {
+		super(message);
+	}
+	
+	public MongoDBConfigurationException(Exception exception) {
+		super(exception);
 	}
 }
