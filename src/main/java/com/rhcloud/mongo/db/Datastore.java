@@ -130,9 +130,20 @@ public class Datastore implements Serializable {
 			return documentManagerFactory;
 		}
 		
-		Properties properties = null;
+		return createDocumentManagerFactory(new File(file), name);
 		
-		File xmlFile = new File(file);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @param name
+	 * @return
+	 * @throws MongoDBConfigurationException
+	 */
+	
+	public static DocumentManagerFactory createDocumentManagerFactory(File xmlFile, String name) throws MongoDBConfigurationException {
+		Properties properties = null;
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;
 		try {
@@ -175,32 +186,22 @@ public class Datastore implements Serializable {
 		
 		LOG.info("searching WEB-INF for configuration file: mongodb.cfg.xml");
 		
-		ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+		ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();		
+		String path = servletContext.getRealPath("/WEB-INF/classes");
 		
-		Reflections reflections = new Reflections(new ConfigurationBuilder().setUrls(ClasspathHelper.forWebInfClasses(servletContext))
-				.setScanners(new ResourcesScanner()));
+		File configFile = new File(path + "/mongodb.cfg.xml");
 		
-		Set<String> configFiles = reflections.getResources(Pattern.compile(".*\\.cfg\\.xml"));
-		
-		LOG.info("number of mongodb.cfg.xml configuration files found: " + String.valueOf(configFiles.size()));
-		
-		if (configFiles.size() == 0) {
+		if (! configFile.exists()) {
 			throw new MongoDBConfigurationException();
-		}
-		
-		if (configFiles.size() > 1) {
-			throw new MongoDBConfigurationException(configFiles.size() + " configuration files found. Only one mongodb.cfg.xml is allowed.");
 		}		
 		
-		String file = configFiles.iterator().next();
-		
-		LOG.info("configuration file: " + file);
+		LOG.info("configuration file: " + configFile.getPath());
 		
 		/**
 		 * create the DocumentManagerFactory based on the default config
 		 */
 		
-		return createDocumentManagerFactory(file, datastore.name());
+		return createDocumentManagerFactory(configFile, datastore.name());
 	}
 	
 	/**
