@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -16,10 +14,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -167,7 +161,7 @@ public class Datastore implements Serializable {
 		return createDocumentManagerFactory(properties);
 	}
 	
-	@Produces
+	//@Produces
 	public static DocumentManagerFactory createDocumentManagerFactory(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
 		
 		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
@@ -192,10 +186,9 @@ public class Datastore implements Serializable {
 		File configFile = new File(path + "/mongodb.cfg.xml");
 		
 		if (! configFile.exists()) {
+			LOG.severe("unable to find the configuration file");
 			throw new MongoDBConfigurationException();
 		}		
-		
-		LOG.info("configuration file: " + configFile.getPath());
 		
 		/**
 		 * create the DocumentManagerFactory based on the default config

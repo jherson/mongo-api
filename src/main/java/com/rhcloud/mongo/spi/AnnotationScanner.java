@@ -21,6 +21,7 @@ public class AnnotationScanner {
 	private static final Logger LOG = Logger.getLogger(AnnotationScanner.class.getName());
 	
 	
+	
 	public void startScan(ServletContext servletContext) {
 		
 		/**
