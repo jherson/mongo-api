@@ -23,6 +23,7 @@ public class DatastoreExtenstion implements Extension {
     }
     
     public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
+    	LOG.info(pat.getClass().getName());
     	if (pat.getAnnotatedType().isAnnotationPresent(Document.class)) {
     		Document document = pat.getClass().getAnnotation(Document.class);
     		LOG.info(document.collection());        	   
