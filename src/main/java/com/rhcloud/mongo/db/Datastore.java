@@ -3,13 +3,10 @@ package com.rhcloud.mongo.db;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.faces.context.FacesContext;
-import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,7 +20,6 @@ import org.xml.sax.SAXException;
 import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.exception.MongoDBConfigurationException;
 import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
-import com.rhcloud.mongo.qualifier.MongoDBDatastore;
 
 public class Datastore implements Serializable {
 
@@ -59,7 +55,7 @@ public class Datastore implements Serializable {
 	 */
 	
 	public static DocumentManagerFactory createDocumentManagerFactory() throws MongoDBConfigurationException {
-		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb.cfg.xml").getFile(), "openshift");
+		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb.cfg.xml").getFile(), "mongolab");
 	}
 	
 	/**
@@ -70,7 +66,14 @@ public class Datastore implements Serializable {
 	 */
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(String name) throws MongoDBConfigurationException {
-		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb.cfg.xml").getFile(), name);
+		LOG.info("loading config file: " + name);
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		URL configFile = loader.getResource("WEB-INF/classes/mongodb.cfg.xml");
+		if (configFile == null) {
+			LOG.info("no config file found");
+			throw new MongoDBConfigurationException("no config file found");
+		}
+		return createDocumentManagerFactory(configFile.getFile(), name);
 	}
 	
 	/**
@@ -159,42 +162,6 @@ public class Datastore implements Serializable {
 		} 
 		
 		return createDocumentManagerFactory(properties);
-	}
-	
-	//@Produces
-	public static DocumentManagerFactory createDocumentManagerFactory(InjectionPoint injectionPoint) throws MongoDBConfigurationException {
-		
-		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
-			return documentManagerFactory;
-		}
-		
-		/**
-		 * get the MongoDBDatastore annotation from the injected class
-		 */
-		
-		MongoDBDatastore datastore = injectionPoint.getAnnotated().getAnnotation(MongoDBDatastore.class);
-		
-		/**
-		 * load configuration from the mongodb.cfg.xml file from the META-INF folder
-		 */
-		
-		LOG.info("searching WEB-INF for configuration file: mongodb.cfg.xml");
-		
-		ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();		
-		String path = servletContext.getRealPath("/WEB-INF/classes");
-		
-		File configFile = new File(path + "/mongodb.cfg.xml");
-		
-		if (! configFile.exists()) {
-			LOG.severe("unable to find the configuration file");
-			throw new MongoDBConfigurationException();
-		}		
-		
-		/**
-		 * create the DocumentManagerFactory based on the default config
-		 */
-		
-		return createDocumentManagerFactory(configFile, datastore.name());
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 package com.rhcloud.mongo.exception;
 
-public class MongoDBConfigurationException extends Exception {
+public class MongoDBConfigurationException extends RuntimeException {
 
 	/**
 	 * 

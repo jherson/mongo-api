@@ -15,6 +15,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ FIELD })
 @Retention(RUNTIME)
 @Documented
-public @interface MongoDBDatastore {
+public @interface DatastoreContext {
     String name();
 }

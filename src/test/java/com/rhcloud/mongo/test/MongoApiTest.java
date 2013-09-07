@@ -29,7 +29,7 @@ public class MongoApiTest {
 	public static void initDB() {
 		
 		try {			
-			documentManagerFactory = Datastore.createDocumentManagerFactory("mongolab");
+			documentManagerFactory = Datastore.createDocumentManagerFactory();
 			documentManager = documentManagerFactory.createDocumentManager();
 
 		} catch (MongoDBConfigurationException e) {

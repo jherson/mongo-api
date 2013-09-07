@@ -1,14 +1,35 @@
 package com.rhcloud.mongo.spi;
 
-import com.rhcloud.mongo.annotation.Document;
-
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessProducer;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
+
+import com.rhcloud.mongo.DocumentManager;
+import com.rhcloud.mongo.DocumentManagerFactory;
+import com.rhcloud.mongo.db.Datastore;
+import com.rhcloud.mongo.qualifier.DatastoreContext;
 
 public class DatastoreExtenstion implements Extension {
 	
@@ -18,19 +39,112 @@ public class DatastoreExtenstion implements Extension {
     
     private static final Logger LOG = Logger.getLogger(DatastoreExtenstion.class.getName());
     
-    public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
+    private Bean<DocumentManagerFactory> dmfBean;
+    
+    @SuppressWarnings("serial")
+	void processProducer(@Observes ProcessProducer<?, DocumentManager> pp, final BeanManager bm) {
+    	
+    	if (pp.getAnnotatedMember().isAnnotationPresent(DatastoreContext.class)) {
+    		
+    		AnnotatedField<?> field = (AnnotatedField<?>) pp.getAnnotatedMember();
+    		
+    		final String datastoreName = field.getAnnotation(DatastoreContext.class).name();
+    		final Class<? extends Field> module = field.getJavaMember().getClass();
+    		final boolean alternative = field.isAnnotationPresent(Alternative.class);
+    		final Set<Annotation> qualifiers = new HashSet<Annotation>();
+    		for (Annotation annotation : field.getAnnotations()) {
+    			Class<? extends Annotation> annotationType = annotation.annotationType();
+    			if (annotationType.isAnnotationPresent(Qualifier.class)) {
+    				qualifiers.add(annotation);
+    			}
+    		}
+    		if (qualifiers.isEmpty()) {
+    			qualifiers.add(new AnnotationLiteral<Default>() {});
+    		}
+    		qualifiers.add(new AnnotationLiteral<Any>() {});
+    		final Set<Type> types = new HashSet<Type>()  {
+				{
+    				add(DocumentManager.class);
+    				add(Object.class);
+    			}
+    		};
+    		
+    		if (dmfBean == null) {
+    			
+    			dmfBean = new Bean<DocumentManagerFactory>() {
+
+					@Override
+					public DocumentManagerFactory create(CreationalContext<DocumentManagerFactory> context) {
+						return Datastore.createDocumentManagerFactory(datastoreName);
+					}
+
+					@Override
+					public void destroy(DocumentManagerFactory dmf, CreationalContext<DocumentManagerFactory> context) {
+						dmf.close();
+						context.release();
+					}
+
+					@Override
+					public Class<?> getBeanClass() {
+						return module;
+					}
+
+					@Override
+					public Set<InjectionPoint> getInjectionPoints() {
+						return Collections.emptySet();
+					}
+
+					@Override
+					public String getName() {
+						return null;
+					}
+
+					@Override
+					public Set<Annotation> getQualifiers() {
+						return qualifiers;
+					}
+
+					@Override
+					public Class<? extends Annotation> getScope() {
+						return ApplicationScoped.class;
+					}
+
+					@Override
+					public Set<Class<? extends Annotation>> getStereotypes() {
+						return null;
+					}
+
+					@Override
+					public Set<Type> getTypes() {
+						return types;
+					}
+
+					@Override
+					public boolean isAlternative() {
+						return alternative;
+					}
+
+					@Override
+					public boolean isNullable() {
+						return false;
+					}		
+    			};
+    		} else {
+    			throw new RuntimeException("Only one DocumentManagerFactory per application is allowed");
+    		}
+    	}
+    }
+    
+    void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     	LOG.info("beginning the scanning process");
     }
     
-    public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
-    	LOG.info(pat.getClass().getName());
-    	if (pat.getAnnotatedType().isAnnotationPresent(Document.class)) {
-    		Document document = pat.getClass().getAnnotation(Document.class);
-    		LOG.info(document.collection());        	   
-        }
-     } 
-    
-    public void afterBeanDiscover(@Observes AfterBeanDiscovery abd) {
+    void afterBeanDiscovery(@Observes AfterBeanDiscovery abd) {
+    	abd.addBean(dmfBean);
     	LOG.info("finished the scanning process");
     }
+    
+    <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
+    	LOG.info("scanning type: " + pat.getAnnotatedType().getJavaClass().getName());
+    } 
 }
