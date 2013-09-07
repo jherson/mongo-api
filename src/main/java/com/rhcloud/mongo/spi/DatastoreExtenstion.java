@@ -23,6 +23,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessProducer;
+import javax.enterprise.inject.spi.Producer;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
@@ -132,6 +133,29 @@ public class DatastoreExtenstion implements Extension {
     		} else {
     			throw new RuntimeException("Only one DocumentManagerFactory per application is allowed");
     		}
+    		Producer<DocumentManager> producer = new Producer<DocumentManager>() {
+
+				@Override
+				public void dispose(DocumentManager documentManager) {
+					documentManager.close();
+				}
+
+				@Override
+				public Set<InjectionPoint> getInjectionPoints() {
+					return Collections.emptySet();
+				}
+				
+				private DocumentManagerFactory getDocumentManagerFactory(CreationalContext<DocumentManager> context) {
+					return (DocumentManagerFactory) bm.getReference(dmfBean, DocumentManagerFactory.class, context);
+				}
+
+				@Override
+				public DocumentManager produce(CreationalContext<DocumentManager> context) {
+					return getDocumentManagerFactory(context).createDocumentManager();
+				}
+    			
+    		};
+    		pp.setProducer(producer);
     	}
     }
     
