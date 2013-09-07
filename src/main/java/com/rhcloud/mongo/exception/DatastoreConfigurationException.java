@@ -1,6 +1,6 @@
 package com.rhcloud.mongo.exception;
 
-public class MongoDBConfigurationException extends RuntimeException {
+public class DatastoreConfigurationException extends RuntimeException {
 
 	/**
 	 * 
@@ -11,15 +11,15 @@ public class MongoDBConfigurationException extends RuntimeException {
 	 * 
 	 */
 	
-	public MongoDBConfigurationException() {
+	public DatastoreConfigurationException() {
 		super("MongoDB Configuration is invalid or missing.");
 	}
 	
-	public MongoDBConfigurationException(String message) {
+	public DatastoreConfigurationException(String message) {
 		super(message);
 	}
 	
-	public MongoDBConfigurationException(Exception exception) {
+	public DatastoreConfigurationException(Exception exception) {
 		super(exception);
 	}
 }

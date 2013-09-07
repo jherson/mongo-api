@@ -12,7 +12,7 @@ import com.mongodb.ServerAddress;
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.db.DatastoreConfig;
-import com.rhcloud.mongo.exception.MongoDBConfigurationException;
+import com.rhcloud.mongo.exception.DatastoreConfigurationException;
 
 public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Serializable {
 
@@ -50,10 +50,10 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	/**
 	 * 
 	 * @param config
-	 * @throws MongoDBConfigurationException
+	 * @throws DatastoreConfigurationException
 	 */
 	
-	public DocumentManagerFactoryImpl(DatastoreConfig config) throws MongoDBConfigurationException {
+	public DocumentManagerFactoryImpl(DatastoreConfig config) throws DatastoreConfigurationException {
 		
 		/**
 		 * 
@@ -68,7 +68,7 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		try {
 			mongo = new MongoClient(new ServerAddress(config.getHost(), config.getPort()));
 		} catch (UnknownHostException e) {
-			throw new MongoDBConfigurationException(e);
+			throw new DatastoreConfigurationException(e);
 		}		
 		
 		/**

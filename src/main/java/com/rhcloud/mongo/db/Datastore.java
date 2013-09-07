@@ -1,9 +1,8 @@
 package com.rhcloud.mongo.db;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -18,7 +17,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.rhcloud.mongo.DocumentManagerFactory;
-import com.rhcloud.mongo.exception.MongoDBConfigurationException;
+import com.rhcloud.mongo.exception.DatastoreConfigurationException;
 import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
 
 public class Datastore implements Serializable {
@@ -51,38 +50,38 @@ public class Datastore implements Serializable {
 
 	/**	 
 	 * @return DocumentManagerFactory
-	 * @throws MongoDBConfigurationException
+	 * @throws DatastoreConfigurationException
 	 */
 	
-	public static DocumentManagerFactory createDocumentManagerFactory() throws MongoDBConfigurationException {
-		return createDocumentManagerFactory(Datastore.class.getClass().getResource("/META-INF/mongodb.cfg.xml").getFile(), "mongolab");
+	public static DocumentManagerFactory createDocumentManagerFactory() throws DatastoreConfigurationException {
+		return createDocumentManagerFactory(Datastore.class.getClass().getResourceAsStream("/META-INF/mongodb.cfg.xml"), "mongolab");
 	}
 	
 	/**
 	 * 
 	 * @param name
 	 * @return
-	 * @throws MongoDBConfigurationException
+	 * @throws DatastoreConfigurationException
 	 */
 	
-	public static DocumentManagerFactory createDocumentManagerFactory(String name) throws MongoDBConfigurationException {
-		LOG.info("loading config file: " + name);
+	public static DocumentManagerFactory createDocumentManagerFactory(String name) throws DatastoreConfigurationException {
+		LOG.info("loading config file for datasource name: " + name);
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		URL configFile = loader.getResource("WEB-INF/classes/mongodb.cfg.xml");
+		InputStream configFile = loader.getResourceAsStream("/mongodb.cfg.xml");
 		if (configFile == null) {
 			LOG.info("no config file found");
-			throw new MongoDBConfigurationException("no config file found");
+			throw new DatastoreConfigurationException("no config file found");
 		}
-		return createDocumentManagerFactory(configFile.getFile(), name);
+		return createDocumentManagerFactory(configFile, name);
 	}
 	
 	/**
 	 * @param properties
 	 * @return DocumentManagerFactory
-	 * @throws MongoDBConfigurationException
+	 * @throws DatastoreConfigurationException
 	 */
 	
-	public static DocumentManagerFactory createDocumentManagerFactory(Properties properties) throws MongoDBConfigurationException {
+	public static DocumentManagerFactory createDocumentManagerFactory(Properties properties) throws DatastoreConfigurationException {
 		
 		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
 			return documentManagerFactory;
@@ -101,10 +100,10 @@ public class Datastore implements Serializable {
 	/**
 	 * @param config
 	 * @return DocumentManagerFactory
-	 * @throws MongoDBConfigurationException
+	 * @throws DatastoreConfigurationException
 	 */
 	
-	public static DocumentManagerFactory createDocumentManagerFactory(DatastoreConfig config) throws MongoDBConfigurationException {
+	public static DocumentManagerFactory createDocumentManagerFactory(DatastoreConfig config) throws DatastoreConfigurationException {
 		
 		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
 			return documentManagerFactory;
@@ -118,31 +117,13 @@ public class Datastore implements Serializable {
 	 * @param file
 	 * @param name
 	 * @return
-	 * @throws MongoDBConfigurationException
+	 * @throws DatastoreConfigurationException
 	 */
 	
-	public static DocumentManagerFactory createDocumentManagerFactory(String file, String name) throws MongoDBConfigurationException {
-		
-		if (documentManagerFactory != null && documentManagerFactory.isOpen()) {
-			return documentManagerFactory;
-		}
-		
-		return createDocumentManagerFactory(new File(file), name);
-		
-	}
-	
-	/**
-	 * 
-	 * @param file
-	 * @param name
-	 * @return
-	 * @throws MongoDBConfigurationException
-	 */
-	
-	public static DocumentManagerFactory createDocumentManagerFactory(File xmlFile, String name) throws MongoDBConfigurationException {
-		Properties properties = null;
+	public static DocumentManagerFactory createDocumentManagerFactory(InputStream xmlFile, String name) throws DatastoreConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = null;
+		Properties properties = null;
 		try {
 			builder = factory.newDocumentBuilder();
 			Document document = builder.parse(xmlFile);
@@ -158,7 +139,7 @@ public class Datastore implements Serializable {
 			}
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			LOG.severe(e.getMessage());
-			throw new MongoDBConfigurationException(e);
+			throw new DatastoreConfigurationException(e);
 		} 
 		
 		return createDocumentManagerFactory(properties);

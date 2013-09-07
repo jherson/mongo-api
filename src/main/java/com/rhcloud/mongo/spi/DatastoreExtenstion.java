@@ -65,7 +65,7 @@ public class DatastoreExtenstion implements Extension {
     		qualifiers.add(new AnnotationLiteral<Any>() {});
     		final Set<Type> types = new HashSet<Type>()  {
 				{
-    				add(DocumentManager.class);
+    				add(DocumentManagerFactory.class);
     				add(Object.class);
     			}
     		};

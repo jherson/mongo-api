@@ -16,7 +16,7 @@ import org.junit.Test;
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.DocumentManagerFactory;
 import com.rhcloud.mongo.db.Datastore;
-import com.rhcloud.mongo.exception.MongoDBConfigurationException;
+import com.rhcloud.mongo.exception.DatastoreConfigurationException;
 import com.rhcloud.mongo.test.model.MongoTestObject;
 
 public class MongoApiTest {
@@ -32,7 +32,7 @@ public class MongoApiTest {
 			documentManagerFactory = Datastore.createDocumentManagerFactory();
 			documentManager = documentManagerFactory.createDocumentManager();
 
-		} catch (MongoDBConfigurationException e) {
+		} catch (DatastoreConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
