@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.test;
+package com.rhcloud.mongodb.persistence.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -13,11 +13,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.rhcloud.mongo.test.model.MongoTestObject;
 import com.rhcloud.mongodb.persistence.DocumentManager;
 import com.rhcloud.mongodb.persistence.DocumentManagerFactory;
 import com.rhcloud.mongodb.persistence.datastore.Datastore;
 import com.rhcloud.mongodb.persistence.exception.DatastoreConfigurationException;
+import com.rhcloud.mongodb.persistence.test.model.MongoTestObject;
 
 public class MongoApiTest {
 	

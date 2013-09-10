@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.test.model;
+package com.rhcloud.mongodb.persistence.test.model;
 
 import java.util.Date;
 
