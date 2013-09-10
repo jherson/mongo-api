@@ -15,7 +15,7 @@
  * limitations under the License.
  * 
  */
-package com.rhcloud.mongo.model;
+package com.rhcloud.mongodb.persistence;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -28,8 +28,8 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.internal.bind.DateTypeAdapter;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
-import com.rhcloud.mongo.annotation.Id;
+import com.rhcloud.mongodb.persistence.adapter.ObjectIdTypeAdapter;
+import com.rhcloud.mongodb.persistence.annotation.Id;
 
 /**
  * 

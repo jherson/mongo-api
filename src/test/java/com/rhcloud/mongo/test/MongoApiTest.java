@@ -13,11 +13,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.rhcloud.mongo.DocumentManager;
-import com.rhcloud.mongo.DocumentManagerFactory;
-import com.rhcloud.mongo.db.Datastore;
-import com.rhcloud.mongo.exception.DatastoreConfigurationException;
 import com.rhcloud.mongo.test.model.MongoTestObject;
+import com.rhcloud.mongodb.persistence.DocumentManager;
+import com.rhcloud.mongodb.persistence.DocumentManagerFactory;
+import com.rhcloud.mongodb.persistence.datastore.Datastore;
+import com.rhcloud.mongodb.persistence.exception.DatastoreConfigurationException;
 
 public class MongoApiTest {
 	

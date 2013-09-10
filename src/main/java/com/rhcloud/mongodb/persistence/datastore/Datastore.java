@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.db;
+package com.rhcloud.mongodb.persistence.datastore;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.rhcloud.mongo.DocumentManagerFactory;
-import com.rhcloud.mongo.exception.DatastoreConfigurationException;
-import com.rhcloud.mongo.impl.DocumentManagerFactoryImpl;
+import com.rhcloud.mongodb.persistence.DocumentManagerFactory;
+import com.rhcloud.mongodb.persistence.exception.DatastoreConfigurationException;
+import com.rhcloud.mongodb.persistence.impl.DocumentManagerFactoryImpl;
 
 public class Datastore implements Serializable {
 

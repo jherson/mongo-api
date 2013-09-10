@@ -16,7 +16,7 @@
  * 
  */
 
-package com.rhcloud.mongo.impl;
+package com.rhcloud.mongodb.persistence.impl;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -33,10 +33,10 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
-import com.rhcloud.mongo.DocumentManager;
-import com.rhcloud.mongo.Query;
-import com.rhcloud.mongo.adapter.DateTypeAdapter;
-import com.rhcloud.mongo.adapter.ObjectIdTypeAdapter;
+import com.rhcloud.mongodb.persistence.DocumentManager;
+import com.rhcloud.mongodb.persistence.Query;
+import com.rhcloud.mongodb.persistence.adapter.DateTypeAdapter;
+import com.rhcloud.mongodb.persistence.adapter.ObjectIdTypeAdapter;
 
 /**
  * @author jherson

@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.impl;
+package com.rhcloud.mongodb.persistence.impl;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.QueryBuilder;
-import com.rhcloud.mongo.Query;
+import com.rhcloud.mongodb.persistence.Query;
 
 /**
  * @author jherson

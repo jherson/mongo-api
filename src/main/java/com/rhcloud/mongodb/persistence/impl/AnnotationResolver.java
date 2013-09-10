@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.impl;
+package com.rhcloud.mongodb.persistence.impl;
 
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.getAllMethods;
@@ -18,9 +18,9 @@ import org.bson.types.ObjectId;
 import com.google.common.collect.Maps;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.rhcloud.mongo.annotation.Document;
-import com.rhcloud.mongo.annotation.Id;
-import com.rhcloud.mongo.annotation.Index;
+import com.rhcloud.mongodb.persistence.annotation.Document;
+import com.rhcloud.mongodb.persistence.annotation.Id;
+import com.rhcloud.mongodb.persistence.annotation.Index;
 
 public class AnnotationResolver implements Serializable {
 	

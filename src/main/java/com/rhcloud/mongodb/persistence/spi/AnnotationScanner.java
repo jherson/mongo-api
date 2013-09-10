@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.spi;
+package com.rhcloud.mongodb.persistence.spi;
 
 import java.util.logging.Logger;
 

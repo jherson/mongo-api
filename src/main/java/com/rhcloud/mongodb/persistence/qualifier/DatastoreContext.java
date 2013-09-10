@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.qualifier;
+package com.rhcloud.mongodb.persistence.qualifier;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

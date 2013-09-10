@@ -16,7 +16,7 @@
  * 
  */
 
-package com.rhcloud.mongo.adapter;
+package com.rhcloud.mongodb.persistence.adapter;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;

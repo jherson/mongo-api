@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.annotation;
+package com.rhcloud.mongodb.persistence.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

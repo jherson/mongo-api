@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.db;
+package com.rhcloud.mongodb.persistence.datastore;
 
 import java.io.Serializable;
 

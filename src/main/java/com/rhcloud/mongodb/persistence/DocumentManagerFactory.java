@@ -1,4 +1,4 @@
-package com.rhcloud.mongo;
+package com.rhcloud.mongodb.persistence;
 
 public interface DocumentManagerFactory {
 	

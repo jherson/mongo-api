@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.rhcloud.mongodb</groupId>
+	<groupId>com.rhcloud.mongodb.persistence</groupId>
 	<artifactId>mongodb-persistence-api</artifactId>
 	<version>0.2.3-SNAPSHOT</version>
 	<name>MongoDB persistence API</name>

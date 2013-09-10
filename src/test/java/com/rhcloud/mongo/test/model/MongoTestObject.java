@@ -2,9 +2,9 @@ package com.rhcloud.mongo.test.model;
 
 import java.util.Date;
 
-import com.rhcloud.mongo.model.BaseDocument;
-import com.rhcloud.mongo.annotation.Document;
-import com.rhcloud.mongo.annotation.Index;
+import com.rhcloud.mongodb.persistence.BaseDocument;
+import com.rhcloud.mongodb.persistence.annotation.Document;
+import com.rhcloud.mongodb.persistence.annotation.Index;
 
 @Document(collection = "TestObjects")
 @Index(name="testindex", key = "name")

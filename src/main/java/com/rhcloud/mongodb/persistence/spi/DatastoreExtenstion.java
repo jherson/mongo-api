@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.spi;
+package com.rhcloud.mongodb.persistence.spi;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -27,11 +27,11 @@ import javax.enterprise.inject.spi.Producer;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
-import com.rhcloud.mongo.DocumentManager;
-import com.rhcloud.mongo.DocumentManagerFactory;
-import com.rhcloud.mongo.annotation.Document;
-import com.rhcloud.mongo.db.Datastore;
-import com.rhcloud.mongo.qualifier.DatastoreContext;
+import com.rhcloud.mongodb.persistence.DocumentManager;
+import com.rhcloud.mongodb.persistence.DocumentManagerFactory;
+import com.rhcloud.mongodb.persistence.annotation.Document;
+import com.rhcloud.mongodb.persistence.datastore.Datastore;
+import com.rhcloud.mongodb.persistence.qualifier.DatastoreContext;
 
 public class DatastoreExtenstion implements Extension {
 	

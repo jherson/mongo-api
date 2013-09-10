@@ -1,12 +1,12 @@
-package com.rhcloud.mongo.annotation;
+package com.rhcloud.mongodb.persistence.annotation;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Document {
-    String collection();
+public @interface Embedded {
+	String name();
 }

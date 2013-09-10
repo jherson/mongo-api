@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.exception;
+package com.rhcloud.mongodb.persistence.exception;
 
 public class DatastoreConfigurationException extends RuntimeException {
 

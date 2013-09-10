@@ -1,4 +1,4 @@
-package com.rhcloud.mongo.impl;
+package com.rhcloud.mongodb.persistence.impl;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
@@ -9,10 +9,10 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
-import com.rhcloud.mongo.DocumentManager;
-import com.rhcloud.mongo.DocumentManagerFactory;
-import com.rhcloud.mongo.db.DatastoreConfig;
-import com.rhcloud.mongo.exception.DatastoreConfigurationException;
+import com.rhcloud.mongodb.persistence.DocumentManager;
+import com.rhcloud.mongodb.persistence.DocumentManagerFactory;
+import com.rhcloud.mongodb.persistence.datastore.DatastoreConfig;
+import com.rhcloud.mongodb.persistence.exception.DatastoreConfigurationException;
 
 public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Serializable {
 
