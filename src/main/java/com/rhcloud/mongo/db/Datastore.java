@@ -65,7 +65,7 @@ public class Datastore implements Serializable {
 	 */
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(String name) throws DatastoreConfigurationException {
-		LOG.info("loading config file for datasource name: " + name);
+		LOG.info("Processing DatastoreContext [ name: " + name + "]");
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		InputStream configFile = loader.getResourceAsStream("/mongodb.cfg.xml");
 		if (configFile == null) {

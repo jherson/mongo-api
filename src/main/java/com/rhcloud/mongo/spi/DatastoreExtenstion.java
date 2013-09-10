@@ -29,6 +29,7 @@ import javax.inject.Qualifier;
 
 import com.rhcloud.mongo.DocumentManager;
 import com.rhcloud.mongo.DocumentManagerFactory;
+import com.rhcloud.mongo.annotation.Document;
 import com.rhcloud.mongo.db.Datastore;
 import com.rhcloud.mongo.qualifier.DatastoreContext;
 
@@ -169,6 +170,8 @@ public class DatastoreExtenstion implements Extension {
     }
     
     <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
-    	LOG.info("scanning type: " + pat.getAnnotatedType().getJavaClass().getName());
+    	if (pat.getAnnotatedType().getJavaClass().isAnnotationPresent(Document.class)) {
+    		LOG.info("collection found: " + pat.getAnnotatedType().getJavaClass().getAnnotation(Document.class).collection());
+    	}
     } 
 }
