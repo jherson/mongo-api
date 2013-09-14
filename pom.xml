@@ -16,10 +16,10 @@
 		<version>7</version>
 	</parent>
 
-	<url>https://github.com/jherson/mongo-api</url>
+	<url>https://github.com/jherson/mongodb-persistence-api</url>
 
 	<issueManagement>
-		<url>https://github.com/jherson/mongo-api/issues</url>
+		<url>https://github.com/jherson/mongodb-persistence-api/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
 
@@ -32,9 +32,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git@github.com:jherson/mongo-api</connection>
-		<developerConnection>scm:git:git@github.com:jherson/mongo-api</developerConnection>
-		<url>https://github.com/jherson/mongo-api</url>
+		<connection>scm:git:git@github.com:jherson/mongodb-persistence-api</connection>
+		<developerConnection>scm:git:git@github.com:jherson/mongodb-persistence-api</developerConnection>
+		<url>https://github.com/jherson/mongodb-persistence-api</url>
 	</scm>
 	<developers>
 		<developer>
