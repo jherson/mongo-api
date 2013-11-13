@@ -4,9 +4,9 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.rhcloud.mongodb.persistence</groupId>
-	<artifactId>mongodb-persistence-api</artifactId>
-	<version>0.2.3-SNAPSHOT</version>
+	<groupId>com.nowellpoint</groupId>
+	<artifactId>nowellpoint-mongodb-api</artifactId>
+	<version>0.3.0-SNAPSHOT</version>
 	<name>MongoDB persistence API</name>
 	<description>Lightweight set of J2EE compliant APIs for MongoDB</description>
 
@@ -16,10 +16,10 @@
 		<version>7</version>
 	</parent>
 
-	<url>https://github.com/jherson/mongodb-persistence-api</url>
+	<url>http://www.nowellpoint.com</url>
 
 	<issueManagement>
-		<url>https://github.com/jherson/mongodb-persistence-api/issues</url>
+		<url>https://github.com/nowellpoint/nowellpoint-mongodb-api</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
 
@@ -32,9 +32,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git@github.com:jherson/mongodb-persistence-api</connection>
-		<developerConnection>scm:git:git@github.com:jherson/mongodb-persistence-api</developerConnection>
-		<url>https://github.com/jherson/mongodb-persistence-api</url>
+		<connection>scm:git:git@github.com:nowellpoint/nowellpoint-mongodb-api</connection>
+		<developerConnection>scm:git:git@github.com:nowellpoint/nowellpoint-mongodb-api</developerConnection>
+		<url>https://github.com/nowellpoint/nowellpoint-mongodb-api</url>
 	</scm>
 	<developers>
 		<developer>
@@ -49,24 +49,12 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 	</properties>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.jboss.arquillian</groupId>
-				<artifactId>arquillian-bom</artifactId>
-				<version>1.1.1.Final</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
-                <dependency>
-            <groupId>xalan</groupId>
-            <artifactId>xalan</artifactId>
-            <version>2.7.1</version>
-        </dependency>
+		<dependency>
+			<groupId>xalan</groupId>
+			<artifactId>xalan</artifactId>
+			<version>2.7.1</version>
+		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -98,11 +86,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.arquillian.junit</groupId>
-			<artifactId>arquillian-junit-container</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
