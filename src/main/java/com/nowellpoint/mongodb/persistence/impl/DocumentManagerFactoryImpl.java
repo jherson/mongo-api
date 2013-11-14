@@ -84,12 +84,18 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		db = mongo.getDB(config.getDatabase());
 		
 		/**
-		 * handle authentication failure
+		 * handle authentication 
 		 */
 		
-		if (!db.authenticate(config.getUsername(), config.getPassword().toCharArray())) {
-			throw new MongoException(String.format("Failed to authenticate against db: %s", db));
+		if (config.getUsername() != null && config.getUsername().trim().length() > 0) {
+			authenticate(config.getUsername(), config.getPassword());
 		}
+		
+		/**
+		 * set the isOpen flag 
+		 */
+		
+		isOpen = Boolean.TRUE;
 		
 		/**
 		 * 
@@ -104,8 +110,10 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	
 	@Override
 	public void close() {
-		mongo.close();
-		isOpen = Boolean.FALSE;
+		if (isOpen) {
+			mongo.close();
+			isOpen = Boolean.FALSE;
+		}
 	}
 	
 	/**
@@ -124,5 +132,15 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	@Override
 	public DocumentManager createDocumentManager() {
 		return new DocumentManagerImpl(mongo, db);
+	}
+	
+	/**
+	 * 
+	 */
+	
+	private void authenticate(String username, String password) throws MongoException {
+		if (!db.authenticate(username, password.toCharArray())) {
+			throw new MongoException(String.format("Failed to authenticate against db: %s", db));
+		}
 	}
 }

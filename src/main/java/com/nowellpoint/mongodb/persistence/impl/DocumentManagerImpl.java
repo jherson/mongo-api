@@ -43,6 +43,7 @@ import com.nowellpoint.mongodb.persistence.adapter.ObjectIdTypeAdapter;
  *
  */
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
@@ -164,7 +165,6 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * @return object found based on objectId
 	 */
 	
-	@SuppressWarnings({ "unchecked" })
 	@Override
 	public <T> T find(Class<T> clazz, ObjectId id) {
 		return (T) createQuery(clazz)
@@ -228,7 +228,6 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * @return Query
 	 */
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public <T> Query createQuery(Class<T> clazz) {		
 		return new QueryImpl(this, clazz);
