@@ -5,7 +5,6 @@ import java.util.List;
 public interface Query<T> {
 	
 	/**
-	 * put
 	 * 
 	 * @param key
 	 * @return Query
@@ -14,7 +13,6 @@ public interface Query<T> {
 	Query<T> field(String key);
 	
 	/**
-	 * is
 	 * 
 	 * @param value
 	 * @return Query
@@ -23,9 +21,7 @@ public interface Query<T> {
 	Query<T> isEqual(Object value);
 	
 	/**
-	 * getSingleResult
 	 * 
-	 * @param clazz
 	 * @return T
 	 */
 	
@@ -33,8 +29,7 @@ public interface Query<T> {
 	
 	/**
 	 * 
-	 * @param clazz
-	 * @return List<T>
+	 * @return
 	 */
 	
 	List<T> getResultList();

@@ -60,7 +60,7 @@ public class DatastoreConfig implements Serializable {
 	/**
 	 * getHostname
 	 * 
-	 * @return hostname
+	 * @return host
 	 */
 	
 	public String getHost() {

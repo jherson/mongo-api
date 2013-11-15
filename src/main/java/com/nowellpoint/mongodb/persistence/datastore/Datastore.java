@@ -60,7 +60,7 @@ public class Datastore implements Serializable {
 	/**
 	 * 
 	 * @param name
-	 * @return
+	 * @return DocumentManagerFactory
 	 * @throws DatastoreConfigurationException
 	 */
 	
@@ -114,9 +114,9 @@ public class Datastore implements Serializable {
 	
 	/**
 	 * 
-	 * @param file
+	 * @param xmlFile
 	 * @param name
-	 * @return
+	 * @return DocumentManagerFactory
 	 * @throws DatastoreConfigurationException
 	 */
 	
@@ -133,7 +133,6 @@ public class Datastore implements Serializable {
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					Element element = (Element) node;
 					if (element.getAttribute("name").equals(name)) {
-						LOG.info("Properties Length: " + element.getElementsByTagName("properties").getLength());
 						properties = parseProperties(element.getElementsByTagName("properties"));
 					}
 				}
@@ -149,7 +148,7 @@ public class Datastore implements Serializable {
 	/**
 	 * 
 	 * @param nodeList
-	 * @return
+	 * @return Properties
 	 */
 	
 	private static Properties parseProperties(NodeList nodeList) {
@@ -157,7 +156,6 @@ public class Datastore implements Serializable {
 		for (int i = 0; i < nodeList.item(0).getChildNodes().getLength(); i++) {
 			Node node = nodeList.item(0).getChildNodes().item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				LOG.info("Node Type: " + node.getNodeType());
 				Element property = (Element) node;
 				if (property.getAttribute("value") != null) {
 				    properties.put(property.getAttribute("name"), parsePropertyValue(property.getAttribute("value")));
@@ -170,7 +168,7 @@ public class Datastore implements Serializable {
 	/**
 	 * 
 	 * @param value
-	 * @return
+	 * @return String
 	 */
 	
 	private static String parsePropertyValue(String value) {
