@@ -4,7 +4,7 @@
 
 	<groupId>com.nowellpoint</groupId>
 	<artifactId>nowellpoint-mongodb-api</artifactId>
-	<version>0.3.2-SNAPSHOT</version>
+	<version>0.3.2</version>
 	<name>MongoDB persistence API</name>
 	<description>Lightweight set of J2EE compliant APIs for MongoDB</description>
 
