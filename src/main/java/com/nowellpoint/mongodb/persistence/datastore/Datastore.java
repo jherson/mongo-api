@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -65,7 +66,26 @@ public class Datastore implements Serializable {
 	 */
 	
 	public static DocumentManagerFactory createDocumentManagerFactory(String name) throws DatastoreConfigurationException {
-		LOG.info("Processing DatastoreContext [ name: " + name + "]");
+		LOG.info("Processing DatastoreContext [ name: " + name + " ]");
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		InputStream configFile = loader.getResourceAsStream("/mongodb.cfg.xml");
+		if (configFile == null) {
+			LOG.info("no config file found");
+			throw new DatastoreConfigurationException("no config file found");
+		}
+		return createDocumentManagerFactory(configFile, name);
+	}
+	
+	/**
+	 * 
+	 * @param name
+	 * @param collections
+	 * @return
+	 * @throws DatastoreConfigurationException
+	 */
+	
+	public static DocumentManagerFactory createDocumentManagerFactory(String name, Set<Object> collections) throws DatastoreConfigurationException {
+		LOG.info("Processing DatastoreContext [ name: " + name + " ]");
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		InputStream configFile = loader.getResourceAsStream("/mongodb.cfg.xml");
 		if (configFile == null) {

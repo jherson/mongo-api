@@ -1,26 +1,22 @@
 package com.nowellpoint.mongodb.persistence.impl;
 
-import static org.reflections.ReflectionUtils.getAllFields;
-import static org.reflections.ReflectionUtils.getAllMethods;
-import static org.reflections.ReflectionUtils.withAnnotation;
-import static org.reflections.ReflectionUtils.withName;
-
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.types.ObjectId;
 
-import com.google.common.collect.Maps;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.nowellpoint.mongodb.persistence.annotation.Collection;
 import com.nowellpoint.mongodb.persistence.annotation.Document;
 import com.nowellpoint.mongodb.persistence.annotation.Id;
 import com.nowellpoint.mongodb.persistence.annotation.Index;
+import com.nowellpoint.mongodb.persistence.exception.PersistenceException;
 
 public class AnnotationResolver implements Serializable {
 	
@@ -34,7 +30,7 @@ public class AnnotationResolver implements Serializable {
 	 * 
 	 */
 	
-	private static Map<Class<?>, String> documentMap = Maps.newConcurrentMap();
+	private static Map<Class<?>, String> documentMap = new ConcurrentHashMap<Class<?>, String>();
 
 	public static <T> String resolveCollection(Object object) {
 		return resolveCollection(object.getClass());
@@ -45,7 +41,7 @@ public class AnnotationResolver implements Serializable {
 		if (documentMap.containsKey(clazz)) {
 			collectionName = documentMap.get(clazz);
 		} else {
-			collectionName = getCollectionName(clazz);	
+			collectionName = resolveCollectionName(clazz);	
 			documentMap.put(clazz, collectionName);
 		}
 		return collectionName;
@@ -65,6 +61,34 @@ public class AnnotationResolver implements Serializable {
 		return dbObject;
 	}
 	
+	public static Object resolveId(Object object) {
+		Object id = null;
+		Field[] fields = object.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(Id.class)) {				
+				try {
+					Method method = object.getClass().getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {});
+					System.out.println(method.getName());
+					id = method.invoke(object, new Object[] {});
+					System.out.println("Id: " + id);
+					break;
+				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new PersistenceException(e);
+				} 	
+			}
+		}
+		
+		//if (id == null) {
+		//	throw new MongoPersistenceException("No Id field found for " + object.getClass().getName());
+		//}
+		
+		if (id instanceof ObjectId) {
+            id = new ObjectId(id.toString());
+        }
+		
+		return id;
+	}
+	
 	/**
 	 * getId
 	 * 
@@ -72,33 +96,23 @@ public class AnnotationResolver implements Serializable {
 	 * @return
 	 */
 	
-	@SuppressWarnings("unchecked")
-	public static <T> Object resolveId(Object object) {
-		Set<Field> fields = getAllFields(object.getClass(), withAnnotation(Id.class));
-		String idField = fields.iterator().next().getName();
-		String name = "get" + idField.substring(0, 1).toUpperCase() + idField.substring(1);
-		Set<Method> methods = getAllMethods(object.getClass(), withName(name));
-		Object id = null;
-		if (methods.size() > 0) {
-			try {
-				id = methods.iterator().next().invoke(object, new Object[] {});
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-		if (id instanceof ObjectId) {
-			return new ObjectId(id.toString());
-		}
-		return id;
-	}
-	
-	private static <T> String getCollectionName(Class<T> clazz) {		
-		Annotation annotation = clazz.getAnnotation(Document.class);
-		if (annotation == null) {
+	private static <T> String resolveCollectionName(Class<T> clazz) {	
+		String collectionName = null;
+		if (! clazz.isAnnotationPresent(Document.class)) {
 			throw new RuntimeException("Class must be annotated with the Document annotation");
 		}
-		Document document = (Document) annotation;
-		return document.collection();
+		
+		if (! clazz.isAnnotationPresent(Collection.class)) {
+			throw new RuntimeException("Class must be annotated with the Collection annotation");
+		}
+		
+		Collection collection = (Collection) clazz.getAnnotation(Collection.class);
+		if (collection.name().trim().length() > 0) {
+			collectionName = collection.name();
+		} else {
+			collectionName = clazz.getSimpleName();
+		}
+		return collectionName;
 	}
 	
 }

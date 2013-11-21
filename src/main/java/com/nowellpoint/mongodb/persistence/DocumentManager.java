@@ -88,7 +88,16 @@ public interface DocumentManager {
 	 * @return T
 	 */
 	
-	<T> T find(Class<T> clazz, ObjectId id);	
+	<T> T find(Class<T> clazz, ObjectId objectId);	
+	
+	/**
+	 * 
+	 * @param clazz
+	 * @param id
+	 * @return
+	 */
+	
+	<T> T find(Class<T> clazz, Object id);
 	
 	/**
 	 * createQuery

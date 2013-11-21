@@ -1,12 +1,15 @@
 package com.nowellpoint.mongodb.persistence.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import com.nowellpoint.mongodb.persistence.Query;
+import com.nowellpoint.mongodb.persistence.exception.NoResultException;
+import com.nowellpoint.mongodb.persistence.exception.PersistenceException;
 
 /**
  * @author jherson
@@ -78,7 +81,26 @@ public class QueryImpl<T> implements Query<T> {
 		
 	@Override
 	public T getSingleResult() {
-		return documentManager.getAsObject(clazz, getDBCollection(clazz).findOne(queryBuilder.get()));
+		
+		/**
+		 * execute the findOne query
+		 */
+		
+		DBObject dbObject = getDBCollection(clazz).findOne(queryBuilder.get());
+		
+		/**
+		 * if no records are found then throw exception
+		 */
+		
+		if (dbObject == null) {
+			throw new PersistenceException("Query returned no records");
+		}
+		
+		/**
+		 * convert the document to an object 
+		 */
+		
+		return documentManager.convertDocumentToObject(clazz, dbObject);
 	}
 	
 	/**
@@ -87,17 +109,39 @@ public class QueryImpl<T> implements Query<T> {
 	 */
 	
 	@Override
-	public List<T> getResultList() {			
-		DBCursor cursor = getDBCollection(clazz).find(queryBuilder.get());
+	public List<T> getResultList() {		
 		
-		List<T> queryResult = Lists.newArrayList();
+		/**
+		 * execute the find query
+		 */
+		
+		DBCursor dbCursor = getDBCollection(clazz).find(queryBuilder.get());
+
+		/**
+		 * if no records are found then throw exception
+		 */
+		
+		if (dbCursor == null) {
+			throw new NoResultException("Query returned no records");
+		}
+		
+		/**
+		 * loop through the result converting documents to objects
+		 */
+		
+		List<T> queryResult = new ArrayList<T>();
 		try {
-			while (cursor.hasNext()) {
-				queryResult.add(documentManager.getAsObject(clazz, cursor.next()));
+			while (dbCursor.hasNext()) {
+				queryResult.add(documentManager.convertDocumentToObject(clazz, dbCursor.next()));
 			}
 		} finally {
-			cursor.close();
+			dbCursor.close();
 		}
+		
+		/**
+		 * return the list of records
+		 */
+		
 		return queryResult;
 	}
 	

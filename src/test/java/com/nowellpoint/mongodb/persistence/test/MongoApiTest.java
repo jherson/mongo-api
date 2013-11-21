@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
@@ -19,6 +20,8 @@ import com.nowellpoint.mongodb.persistence.DocumentManagerFactory;
 import com.nowellpoint.mongodb.persistence.datastore.Datastore;
 import com.nowellpoint.mongodb.persistence.exception.DatastoreConfigurationException;
 import com.nowellpoint.mongodb.persistence.test.model.MongoTestObject;
+import com.nowellpoint.mongodb.persistence.test.model.TestListObject;
+import com.nowellpoint.mongodb.persistence.test.model.TestObject;
 
 public class MongoApiTest {
 	
@@ -49,10 +52,50 @@ public class MongoApiTest {
 	@After
 	public void after() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
-		documentManager.deleteAll(MongoTestObject.class);
+		//documentManager.deleteAll(MongoTestObject.class);
+	}
+	
+	@Test
+	public void testCreateCollection() {
+		Assume.assumeTrue(documentManagerFactory.isOpen());
+		TestObject test = new TestObject();
+		test.setId(new Long(11111111));
+		test.setName("testing collection name from class name");
+		
+		List<TestListObject> testList = new ArrayList<TestListObject>();
+		
+		TestListObject testList1 = new TestListObject();
+		testList1.setAmount(1000.00);
+		testList1.setCount(2);
+		testList1.setListName("Test List 1");
+		
+		testList.add(testList1);
+		
+		TestListObject testList2 = new TestListObject();
+		testList2.setAmount(3000.00);
+		testList2.setCount(30);
+		testList2.setListName("Test List 2");
+		
+		testList.add(testList2);
+		
+		test.setTestLists(testList);
+		
+		test = documentManager.insert(TestObject.class, test);
+		
+		System.out.println("Id: " + test.getId());
+		
+		test = documentManager.find(TestObject.class, test.getId());
+		
+		assertNotNull(test);
+		
+		documentManager.delete(test);
+		
+		test = documentManager.find(TestObject.class, test.getId());
+		
+		assertNull(test);
 	}
 
-	@Test
+	//@Test
 	public void testInsert() {		
 		Assume.assumeTrue(documentManagerFactory.isOpen());
 		
@@ -60,7 +103,7 @@ public class MongoApiTest {
 		assertNotNull(testObject.getId());		
 	}
 	
-	@Test
+	//@Test
 	public void testQuery() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
 		
@@ -76,7 +119,7 @@ public class MongoApiTest {
 		assertNotEquals(testObjectList.size(), 0);
 	}
 	
-	@Test
+	//@Test
 	public void testUpdate() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
 		
@@ -88,7 +131,7 @@ public class MongoApiTest {
 		assertEquals(testObject.getName(), documentManager.find(MongoTestObject.class, testObject.getId()).getName());				
 	}
 	
-	@Test
+	//@Test
 	public void testDelete() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
 		

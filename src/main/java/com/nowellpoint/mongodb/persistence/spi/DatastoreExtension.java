@@ -33,15 +33,31 @@ import com.nowellpoint.mongodb.persistence.annotation.Document;
 import com.nowellpoint.mongodb.persistence.datastore.Datastore;
 import com.nowellpoint.mongodb.persistence.qualifier.DatastoreContext;
 
-public class DatastoreExtenstion implements Extension {
+public class DatastoreExtension implements Extension {
 	
 	/**
      * 
      */
     
-    private static final Logger LOG = Logger.getLogger(DatastoreExtenstion.class.getName());
+    private static final Logger LOG = Logger.getLogger(DatastoreExtension.class.getName());
+    
+    /**
+     * 
+     */
     
     private Bean<DocumentManagerFactory> dmfBean;
+    
+    /**
+     * 
+     */
+    
+    private Set<Object> collectionSet = new HashSet<Object>();
+    
+    /**
+     * 
+     * @param pp
+     * @param bm
+     */
     
     @SuppressWarnings("serial")
 	void processProducer(@Observes ProcessProducer<?, DocumentManager> pp, final BeanManager bm) {
@@ -77,7 +93,7 @@ public class DatastoreExtenstion implements Extension {
 
 					@Override
 					public DocumentManagerFactory create(CreationalContext<DocumentManagerFactory> context) {
-						return Datastore.createDocumentManagerFactory(datastoreName);
+						return Datastore.createDocumentManagerFactory(datastoreName, collectionSet);
 					}
 
 					@Override
@@ -169,9 +185,9 @@ public class DatastoreExtenstion implements Extension {
     	LOG.info("finished the scanning process");
     }
     
-    <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
-    	if (pat.getAnnotatedType().getJavaClass().isAnnotationPresent(Document.class)) {
-    		LOG.info("collection found: " + pat.getAnnotatedType().getJavaClass().getAnnotation(Document.class).collection());
+    <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat, BeanManager beanManager) {
+    	if (pat.getAnnotatedType().getJavaClass().isAnnotationPresent(Document.class)) {    		
+    		collectionSet.add(pat.getAnnotatedType().getJavaClass());
     	}
     } 
 }

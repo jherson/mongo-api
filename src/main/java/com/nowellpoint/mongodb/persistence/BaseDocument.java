@@ -18,17 +18,13 @@
 package com.nowellpoint.mongodb.persistence;
 
 import java.io.Serializable;
-import java.util.Date;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 
 import org.bson.types.ObjectId;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
-import com.google.gson.internal.bind.DateTypeAdapter;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-import com.nowellpoint.mongodb.persistence.adapter.ObjectIdTypeAdapter;
 import com.nowellpoint.mongodb.persistence.annotation.Id;
 
 /**
@@ -49,18 +45,7 @@ public abstract class BaseDocument implements Serializable {
 	 * 
 	 */
 	
-	private static final Gson GSON = new GsonBuilder().			
-			serializeNulls().	
-			registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter()).
-			registerTypeAdapter(Date.class, new DateTypeAdapter()).
-			create();
-	
-	/**
-	 * 
-	 */
-	
 	@Id
-	@SerializedName("_id")
 	private ObjectId id;
 	
 	/**
@@ -77,7 +62,7 @@ public abstract class BaseDocument implements Serializable {
 	 */
 	
 	public BaseDocument(String json) {
-		GSON.fromJson(json, this.getClass());
+		
 	}
 	
 	/**
@@ -86,7 +71,7 @@ public abstract class BaseDocument implements Serializable {
 	 */
 	
 	public BaseDocument(DBObject dbObject) {
-		GSON.fromJson(JSON.serialize(dbObject), this.getClass());
+		
 	}
 	
 	/**
@@ -108,22 +93,11 @@ public abstract class BaseDocument implements Serializable {
 	}
 	
 	/**
-	 * getAsJSON
-	 * 
 	 * @return json String
 	 */
 	
 	public String getAsJSON() {
-		return GSON.toJson(this);
+		JsonObject json = Json.createObjectBuilder().add("_id", getId().toString()).build();
+		return json.toString();
 	}	
-	
-	/**
-	 * getAsDBObject
-	 * 
-	 * @return DBObject
-	 */
-	
-	public DBObject getAsDBObject() {
-		return (DBObject) JSON.parse(GSON.toJson(this));
-	}
 }
