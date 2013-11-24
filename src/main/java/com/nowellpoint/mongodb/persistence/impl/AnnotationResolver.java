@@ -2,6 +2,9 @@ package com.nowellpoint.mongodb.persistence.impl;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -61,26 +64,32 @@ public class AnnotationResolver implements Serializable {
 		return dbObject;
 	}
 	
-	public static Object resolveId(Object object) {
+	public static Object getId(Object object) {
 		Object id = null;
 		Field[] fields = object.getClass().getDeclaredFields();
 		for (Field field : fields) {
-			if (field.isAnnotationPresent(Id.class)) {				
+			if (field.isAnnotationPresent(Id.class)) {					
 				try {
-					Method method = object.getClass().getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {});
-					System.out.println(method.getName());
-					id = method.invoke(object, new Object[] {});
-					System.out.println("Id: " + id);
-					break;
-				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					MethodHandle handle = MethodHandles.lookup().findSetter(object.getClass(), field.getName(), object.getClass());					
+					id = handle.invoke(object);
+					
+				} catch (Throwable e) {
 					throw new PersistenceException(e);
-				} 	
+				}
+				
+//				try {
+//					Method method = object.getClass().getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {});
+//					id = method.invoke(object, new Object[] {});
+//					break;
+//				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+//					throw new PersistenceException(e);
+//				} 	
 			}
 		}
 		
-		//if (id == null) {
-		//	throw new MongoPersistenceException("No Id field found for " + object.getClass().getName());
-		//}
+		if (id == null) {
+			throw new PersistenceException("No Id field found for " + object.getClass().getName());
+		}
 		
 		if (id instanceof ObjectId) {
             id = new ObjectId(id.toString());
@@ -88,6 +97,33 @@ public class AnnotationResolver implements Serializable {
 		
 		return id;
 	}
+	
+	public static void setId(Object object, Object id) {
+		Field[] fields = object.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			System.out.println("set id: " + field.getName());
+			if (field.isAnnotationPresent(Id.class)) {					
+				try {
+					MethodHandle handle = MethodHandles.lookup().findGetter(object.getClass(), field.getName(), object.getClass());
+					handle.invokeWithArguments(id);
+					
+				} catch (Throwable e) {
+					e.printStackTrace();
+					throw new PersistenceException(e);
+				}
+				
+//				try {
+//					Method method = object.getClass().getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {});
+//					id = method.invoke(object, new Object[] {});
+//					break;
+//				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+//					throw new PersistenceException(e);
+//				} 	
+			}
+		}
+	}
+	
+	//private static void invokeMethod()
 	
 	/**
 	 * getId

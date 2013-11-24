@@ -26,6 +26,7 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.DBObject;
 import com.nowellpoint.mongodb.persistence.annotation.Id;
+import com.nowellpoint.mongodb.persistence.annotation.MappedSuperclass;
 
 /**
  * 
@@ -33,6 +34,7 @@ import com.nowellpoint.mongodb.persistence.annotation.Id;
  *
  */
 
+@MappedSuperclass
 public abstract class BaseDocument implements Serializable {
 
 	/**

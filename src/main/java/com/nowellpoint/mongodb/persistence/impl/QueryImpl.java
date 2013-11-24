@@ -86,21 +86,32 @@ public class QueryImpl<T> implements Query<T> {
 		 * execute the findOne query
 		 */
 		
-		DBObject dbObject = getDBCollection(clazz).findOne(queryBuilder.get());
+		DBObject document = getDBCollection(clazz).findOne(queryBuilder.get());
 		
 		/**
 		 * if no records are found then throw exception
 		 */
 		
-		if (dbObject == null) {
-			throw new PersistenceException("Query returned no records");
+		if (document == null) {
+			throw new NoResultException("Query returned no records");
+		}
+		
+		/**
+		 * instansiate the object
+		 */
+		
+		Object object = null;
+		try {
+			object = clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new PersistenceException(e);
 		}
 		
 		/**
 		 * convert the document to an object 
 		 */
 		
-		return documentManager.convertDocumentToObject(clazz, dbObject);
+		return documentManager.convertDocumentToObject(object, document);
 	}
 	
 	/**
@@ -108,6 +119,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * @return list of documents that matched the search criteria
 	 */
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getResultList() {		
 		
@@ -115,13 +127,13 @@ public class QueryImpl<T> implements Query<T> {
 		 * execute the find query
 		 */
 		
-		DBCursor dbCursor = getDBCollection(clazz).find(queryBuilder.get());
+		DBCursor documents = getDBCollection(clazz).find(queryBuilder.get());
 
 		/**
 		 * if no records are found then throw exception
 		 */
 		
-		if (dbCursor == null) {
+		if (documents == null) {
 			throw new NoResultException("Query returned no records");
 		}
 		
@@ -131,11 +143,14 @@ public class QueryImpl<T> implements Query<T> {
 		
 		List<T> queryResult = new ArrayList<T>();
 		try {
-			while (dbCursor.hasNext()) {
-				queryResult.add(documentManager.convertDocumentToObject(clazz, dbCursor.next()));
+			while (documents.hasNext()) {
+				Object object = clazz.newInstance();
+				queryResult.add((T) documentManager.convertDocumentToObject(object, documents.next()));
 			}
+		} catch (InstantiationException | IllegalAccessException e) {
+        	throw new PersistenceException(e);	
 		} finally {
-			dbCursor.close();
+			documents.close();
 		}
 		
 		/**

@@ -19,10 +19,6 @@
 
 package com.nowellpoint.mongodb.persistence;
 
-import org.bson.types.ObjectId;
-
-import com.mongodb.DB;
-
 /**
  * @author jherson
  *
@@ -30,11 +26,11 @@ import com.mongodb.DB;
 public interface DocumentManager {
 	
 	/**
-	 * 
-	 * @param db
+	 * getDocumentManagerFactory
+	 * @return
 	 */
 	
-	void setDB(DB db);
+	DocumentManagerFactory getDocumentManagerFactory();
 	
 	/**
 	 * insert
@@ -47,7 +43,6 @@ public interface DocumentManager {
 	
 	/**
 	 * update
-	 * 
 	 * @param clazz
 	 * @param object
 	 * @return T
@@ -81,16 +76,6 @@ public interface DocumentManager {
 	<T> void deleteAll(Class<T> clazz);
 	
 	/**
-	 * find
-	 * 
-	 * @param clazz
-	 * @param id
-	 * @return T
-	 */
-	
-	<T> T find(Class<T> clazz, ObjectId objectId);	
-	
-	/**
 	 * 
 	 * @param clazz
 	 * @param id
@@ -109,8 +94,9 @@ public interface DocumentManager {
 	<T> Query<T> createQuery(Class<T> clazz);
 	
 	/**
-	 * close
+	 * 
+	 * @param object
 	 */
 	
-	void close();
+	void refresh(Object object);
 }

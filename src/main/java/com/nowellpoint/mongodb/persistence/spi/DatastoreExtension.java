@@ -154,7 +154,7 @@ public class DatastoreExtension implements Extension {
 
 				@Override
 				public void dispose(DocumentManager documentManager) {
-					documentManager.close();
+					
 				}
 
 				@Override

@@ -23,7 +23,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 
@@ -32,16 +35,21 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteResult;
 import com.nowellpoint.mongodb.persistence.DocumentManager;
+import com.nowellpoint.mongodb.persistence.DocumentManagerFactory;
+import com.nowellpoint.mongodb.persistence.MongoExceptionCode;
 import com.nowellpoint.mongodb.persistence.Query;
 import com.nowellpoint.mongodb.persistence.annotation.EmbedMany;
 import com.nowellpoint.mongodb.persistence.annotation.EmbedOne;
 import com.nowellpoint.mongodb.persistence.annotation.EmbeddedDocument;
 import com.nowellpoint.mongodb.persistence.annotation.Id;
+import com.nowellpoint.mongodb.persistence.annotation.MappedSuperclass;
+import com.nowellpoint.mongodb.persistence.annotation.PostPersist;
+import com.nowellpoint.mongodb.persistence.annotation.PrePersist;
 import com.nowellpoint.mongodb.persistence.annotation.Property;
+import com.nowellpoint.mongodb.persistence.exception.DocumentExistsException;
 import com.nowellpoint.mongodb.persistence.exception.PersistenceException;
 
 /**
@@ -68,7 +76,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * 
 	 */
 	
-	private MongoClient mongo; 
+	private DocumentManagerFactory dmf;
 	
 	/**
 	 * 
@@ -78,29 +86,22 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	/**
 	 * constructor
+	 * @param DocumentManagerFactory
 	 */
 	
-	protected DocumentManagerImpl() {
-		 
-	}	
-	
-	/**
-	 * constructor
-	 * @param mongo
-	 */
-	
-	protected DocumentManagerImpl(MongoClient mongo, DB db) {
-		this.mongo = mongo;
-		this.db = db;
+	protected DocumentManagerImpl(DocumentManagerFactory documentManagerFactory) {
+		this.dmf = documentManagerFactory;
+		this.db = documentManagerFactory.getDB();
 	}
-
+	
 	/**
-	 * sets the MongoDB database for us in this DocumentManger
-	 * @param db 
+	 * 
+	 * @return
 	 */
-
-	public void setDB(DB db) {
-		this.db = db;
+	
+	@Override
+	public DocumentManagerFactory getDocumentManagerFactory() {
+		return dmf;
 	}
 	
 	/**
@@ -123,14 +124,19 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> T insert(Class<T> clazz, Object object) {
+		prePersist(object);
 		String collectionName = AnnotationResolver.resolveCollection(object);		
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = convertObjectToDocument(object);	
-		WriteResult result = collection.insert(dbObject);
-		if (result.getError() != null) {
-			throw new MongoException(result.getLastError());
+		DBObject dbObject = convertObjectToDocument(object);
+		try {
+			collection.insert(dbObject);
+		} catch (MongoException e) {
+			if (e.getCode() == MongoExceptionCode.DOCUMENT_EXISTS) {
+				throw new DocumentExistsException(e.getMessage());
+			}
 		}
-		return convertDocumentToObject(clazz, dbObject);
+		postPersist(object);
+		return convertDocumentToObject(object, dbObject);
 	}
 	
 	/**
@@ -143,6 +149,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public <T> T update(Class<T> clazz, Object object) {		
+		prePersist(object);
 		String collectionName = AnnotationResolver.resolveCollection(object);		
 		DBCollection collection = getDB().getCollection(collectionName);
 		DBObject dbObject = convertObjectToDocument(object);
@@ -150,20 +157,8 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
 		}
+		postPersist(object);
 		return convertDocumentToObject(clazz, dbObject);
-	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param clazz
-	 * @param id the ObjectId of the object to query
-	 * @return object found based on objectId
-	 */
-	
-	@Override
-	public <T> T find(Class<T> clazz, ObjectId objectId) {
-		return find(clazz, objectId);
 	}
 	
 	/**
@@ -214,7 +209,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	public <T> void delete(Object object) {
 		String collectionName = AnnotationResolver.resolveCollection(object);
 		DBCollection collection = getDB().getCollection(collectionName);
-		Object id = AnnotationResolver.resolveId(object);
+		Object id = resolveId(object);
 		WriteResult wr = collection.remove(new BasicDBObject(ID, id));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
@@ -247,57 +242,113 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	}
 	
 	/**
-	 * close
+	 * 
 	 */
 	
 	@Override
-	public void close() {
-		mongo.close();
+	public void refresh(Object object) {
+		
 	}
 	
-	protected BasicDBObject convertObjectToDocument(Object object) {			
-		BasicDBObject document = new BasicDBObject();
-		Field[] fields = object.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(Id.class)) {
-				document.put(ID, getId(object, field));
-			} else if (field.isAnnotationPresent(Property.class)) {		
-				document.put(getPropertyName(field), getProperty(object, field));
-			} else if (field.isAnnotationPresent(EmbedOne.class)) {
-				document.put(getPropertyName(field), getEmbedOne(object, field));
-			} else if (field.isAnnotationPresent(EmbedMany.class)) {
-				document.put(getPropertyName(field), getEmbedMany(object, field));
+	private void prePersist(Object object) {
+		Set<Method> methods = getAllMethods(object);
+		for (Method method : methods) {
+			if (method.isAnnotationPresent(PrePersist.class)) {
+			    try {
+					method.invoke(object, new Object[] {});
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new PersistenceException(e);
+				}
+			    break;
 			}
 		}
+	}
+	
+	private void postPersist(Object object) {
+		Set<Method> methods = getAllMethods(object);
+		for (Method method : methods) {
+			if (method.isAnnotationPresent(PostPersist.class)) {
+			    try {
+					method.invoke(object, new Object[] {});
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new PersistenceException(e);
+				}
+			    break;
+			}
+		}
+	}
+	
+	private Set<Field> getAllFields(Object object) {
+		Set<Field> fields = new LinkedHashSet<Field>();
+		if (object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
+			fields.addAll(Arrays.asList(object.getClass().getSuperclass().getDeclaredFields()));
+		}
+		fields.addAll(Arrays.asList(object.getClass().getDeclaredFields()));
+		return fields;
+	}
+	
+	private Set<Method> getAllMethods(Object object) {
+		Set<Method> methods = new LinkedHashSet<Method>();
+		if (object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
+			methods.addAll(Arrays.asList(object.getClass().getSuperclass().getDeclaredMethods()));
+		}
+		methods.addAll(Arrays.asList(object.getClass().getDeclaredMethods()));		
+		return methods;
+	}
+	
+	protected BasicDBObject convertObjectToDocument(Object object) {		
+		
+		/**
+		 * create the MongoDB document
+		 */
+		
+		BasicDBObject document = new BasicDBObject();
+		
+		/**
+		 * invoke superclass getters if the superclass is annotated with MappedSuperclass
+		 */
+		
+		if (object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
+			invokeGetters(object.getClass().getSuperclass(), object, document);
+		}
+		
+		/**
+		 * invoke getters on the object itself
+		 */
+		
+		invokeGetters(object.getClass(), object, document);
+		
+		/**
+		 * return the document
+		 */
 		
 		return document;
 	}
 	
-	protected <T> T convertDocumentToObject(Class<T> clazz, DBObject document) {
-		Object object = null;
-		try {
-			object = clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new PersistenceException(e);
+	protected <T> T convertDocumentToObject(Object object, DBObject document) {
+		
+		/**
+		 * invoke setters on the superclass of object if the superclass is annotated with MappedSuperclass
+		 */
+		
+		if (object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
+			invokeSetters(object.getClass().getSuperclass(), object, document);
 		}
-
-		Field[] fields = object.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(Id.class)) {
-				setFieldValue(object, field, document.get(ID));
-			} else if (field.isAnnotationPresent(Property.class)) {		
-				//document.put(getFieldName(field), getProperty(object, field));
-			} else if (field.isAnnotationPresent(EmbedOne.class)) {
-				//document.put(getFieldName(field), getEmbedOne(object, field));
-			} else if (field.isAnnotationPresent(EmbedMany.class)) {
-				//document.put(getFieldName(field), getEmbedMany(object, field));
-			}
-		}
+		
+		/**
+		 * invoke setters on the object itself
+		 */
+		
+		invokeSetters(object.getClass(), object, document);
+		
+		/**
+		 * return the object
+		 */
 		
 		return (T) object;
 	}
 	
-	private Object getId(Object object, Field field) throws PersistenceException {
+	private Object getIdValue(Object object, Field field) throws PersistenceException {
 		Object id = getFieldValue(object, field);
 		if (field.getType().isAssignableFrom(ObjectId.class)) {
 	    	id = new ObjectId(id.toString()); 	
@@ -309,12 +360,27 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * 
 	 * @param object
 	 * @param field
-	 * @return
+	 * @return Object
 	 * @throws PersistenceException
 	 */
 	
-	private Object getProperty(Object object, Field field) throws PersistenceException {
+	private Object parseProperty(Object object, Field field) throws PersistenceException {
 		return getFieldValue(object, field);
+	}
+	
+	private String getPropertyName(Field field) {
+		String name = field.getAnnotation(Property.class).name();
+		return name.trim().length() > 0 ? name : field.getName();
+	}
+	
+	private String getEmbedOneName(Field field) {
+		String name = field.getAnnotation(EmbedOne.class).name();
+		return name.trim().length() > 0 ? name : field.getName();
+	}
+	
+	private String getEmbedManyName(Field field) {
+		String name = field.getAnnotation(EmbedMany.class).name();
+		return name.trim().length() > 0 ? name : field.getName();
 	}
 	
 	/**
@@ -333,37 +399,60 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		}	
 	}
 	
-	private void setFieldValue(Object object, Field field, Object value) {
+	private Object resolveId(Object object) {
+		Object id = null;
+		Set<Field> fields = getAllFields(object);
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(Id.class)) {					
+				id = getIdValue(object, field);
+			}
+		}
+		return id;
+	}
+	
+	private void invokeGetters(Class clazz, Object object, DBObject document) {
+		Field[] fields = object.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(Id.class)) {
+				document.put(ID, getIdValue(object, field));
+			} else if (field.isAnnotationPresent(Property.class)) {		
+				document.put(getPropertyName(field), parseProperty(object, field));
+			} else if (field.isAnnotationPresent(EmbedOne.class)) {
+				document.put(getEmbedOneName(field), parseEmbedOne(object, field));
+			} else if (field.isAnnotationPresent(EmbedMany.class)) {
+				document.put(getEmbedManyName(field), parseEmbedMany(object, field));
+			}
+		}
+	}
+	
+	private void invokeSetter(Class clazz, Object object, Field field, Object value) {
 		try {
-		    Method method = object.getClass().getMethod("set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {field.getType()});	
+		    Method method = clazz.getMethod("set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {field.getType()});	
 		    method.invoke(object, new Object[] {value});
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new PersistenceException(e);
 		}
 	}
 	
-	private BasicDBObject getEmbedOne(Object object, Field field) throws PersistenceException {
+	private void invokeSetters(Class clazz, Object object, DBObject document) {
+		Field[] fields = clazz.getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(Id.class)) {
+				invokeSetter(clazz, object, field, document.get(ID));
+			} else if (field.isAnnotationPresent(Property.class)) {	
+				invokeSetter(clazz, object, field, document.get(getPropertyName(field)));
+			} else if (field.isAnnotationPresent(EmbedOne.class)) {
+				invokeSetter(clazz, object, field, document.get(getEmbedOneName(field)));
+			} else if (field.isAnnotationPresent(EmbedMany.class)) {
+				invokeSetter(clazz, object, field, document.get(getEmbedManyName(field)));
+			}
+		}
+	}
+	
+	private BasicDBObject parseEmbedOne(Object object, Field field) throws PersistenceException {
 		validateEmbeddedDocument(field);
 		Object embeddedDocument = getFieldValue(object, field);
 		return convertObjectToDocument(embeddedDocument);
-	}
-	
-	/**
-	 * 
-	 * @param field
-	 * @return
-	 */
-	
-	private String getPropertyName(Field field) {
-		String fieldName = null;
-		if (field.isAnnotationPresent(Property.class)) {
-			fieldName = field.getAnnotation(Property.class).name().trim().length() > 0 ? field.getAnnotation(Property.class).name() : field.getName();
-		} else if (field.isAnnotationPresent(EmbedOne.class)) {
-			fieldName = field.getAnnotation(EmbedOne.class).name().trim().length() > 0 ? field.getAnnotation(EmbedOne.class).name() : field.getName();
-		} else if (field.isAnnotationPresent(EmbedMany.class)) {
-			fieldName = field.getAnnotation(EmbedMany.class).name().trim().length() > 0 ? field.getAnnotation(EmbedMany.class).name() : field.getName();
-		}
-		return fieldName;
 	}
 	
 	/**
@@ -372,7 +461,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 * @return BasicDBList
 	 */
 	
-	private BasicDBList getEmbedMany(Object object, Field field) {
+	private BasicDBList parseEmbedMany(Object object, Field field) {
 		validateEmbeddedDocument(field);
 		Object embeddedDocument = getFieldValue(object, field);		
 		List<?> list = (List<?>) embeddedDocument;

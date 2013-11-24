@@ -1,5 +1,7 @@
 package com.nowellpoint.mongodb.persistence;
 
+import com.mongodb.DB;
+
 public interface DocumentManagerFactory {
 	
 	/**
@@ -9,6 +11,13 @@ public interface DocumentManagerFactory {
 	 */
 	
 	DocumentManager createDocumentManager();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	
+	DB getDB();
 	
 	/**
 	 * isOpen

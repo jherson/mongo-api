@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +32,11 @@ public class MongoApiTest {
 	
 	@BeforeClass
 	public static void initDB() {
-		
+			
 		try {			
 			documentManagerFactory = Datastore.createDocumentManagerFactory();
 			documentManager = documentManagerFactory.createDocumentManager();
-
 		} catch (DatastoreConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -58,9 +57,10 @@ public class MongoApiTest {
 	@Test
 	public void testCreateCollection() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
+		
 		TestObject test = new TestObject();
-		test.setId(new Long(11111111));
 		test.setName("testing collection name from class name");
+		test.setNumber(new Integer(1000));
 		
 		List<TestListObject> testList = new ArrayList<TestListObject>();
 		
@@ -82,17 +82,21 @@ public class MongoApiTest {
 		
 		test = documentManager.insert(TestObject.class, test);
 		
-		System.out.println("Id: " + test.getId());
-		
 		test = documentManager.find(TestObject.class, test.getId());
 		
-		assertNotNull(test);
+		assertNotNull(test);		
+		assertNotNull(test.getName());
+		assertNotNull(test.getCreationDate());
 		
-		documentManager.delete(test);
+		List<TestObject> testObjects = documentManager.createQuery(TestObject.class).field("number").isEqual(new Integer(1000)).getResultList();
 		
-		test = documentManager.find(TestObject.class, test.getId());
+		assertEquals(testObjects.size(), 1);
 		
-		assertNull(test);
+		//documentManager.delete(test);
+		
+		//test = documentManager.find(TestObject.class, test.getId());
+		
+		//assertNull(test);
 	}
 
 	//@Test

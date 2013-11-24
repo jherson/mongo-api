@@ -9,6 +9,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 import com.nowellpoint.mongodb.persistence.DocumentManager;
 import com.nowellpoint.mongodb.persistence.DocumentManagerFactory;
 import com.nowellpoint.mongodb.persistence.datastore.DatastoreConfig;
@@ -46,7 +47,6 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	
 	private boolean isOpen;
 	
-	
 	/**
 	 * 
 	 * @param config
@@ -72,10 +72,11 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 		}		
 		
 		/**
-		 * set the default read preference
+		 * set the mongo options
 		 */
 		
 		mongo.setReadPreference(ReadPreference.primaryPreferred());
+		mongo.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 		
 		/**
 		 * log into the DB
@@ -109,6 +110,15 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	 */
 	
 	@Override
+	public DB getDB() {
+		return db;
+	}
+	
+	/**
+	 * 
+	 */
+	
+	@Override
 	public void close() {
 		if (isOpen) {
 			mongo.close();
@@ -131,7 +141,7 @@ public class DocumentManagerFactoryImpl implements DocumentManagerFactory, Seria
 	
 	@Override
 	public DocumentManager createDocumentManager() {
-		return new DocumentManagerImpl(mongo, db);
+		return new DocumentManagerImpl(this);
 	}
 	
 	/**
