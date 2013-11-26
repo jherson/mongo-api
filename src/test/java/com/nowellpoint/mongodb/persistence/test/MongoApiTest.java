@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +22,7 @@ import com.nowellpoint.mongodb.persistence.exception.DatastoreConfigurationExcep
 import com.nowellpoint.mongodb.persistence.test.model.MongoTestObject;
 import com.nowellpoint.mongodb.persistence.test.model.TestListObject;
 import com.nowellpoint.mongodb.persistence.test.model.TestObject;
+import com.nowellpoint.mongodb.persistence.test.model.NameValuePair;
 
 public class MongoApiTest {
 	
@@ -51,10 +51,19 @@ public class MongoApiTest {
 	@After
 	public void after() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
-		//documentManager.deleteAll(MongoTestObject.class);
+		documentManager.deleteAll(MongoTestObject.class);
 	}
 	
 	@Test
+	public void testNameValuePair() {
+		Assume.assumeTrue(documentManagerFactory.isOpen());
+		List<NameValuePair> properties = documentManager.createQuery(NameValuePair.class).getResultList();
+		for (NameValuePair property : properties) {
+			System.out.println(property.getName() + " : " +  property.getValue());
+		}
+	}
+	
+	//@Test
 	public void testCreateCollection() {
 		Assume.assumeTrue(documentManagerFactory.isOpen());
 		
@@ -88,15 +97,18 @@ public class MongoApiTest {
 		assertNotNull(test.getName());
 		assertNotNull(test.getCreationDate());
 		
-		List<TestObject> testObjects = documentManager.createQuery(TestObject.class).field("number").isEqual(new Integer(1000)).getResultList();
+		List<TestObject> testObjects = documentManager.createQuery(TestObject.class)
+				.field("number")
+				.isEqual(new Integer(1000))
+				.getResultList();
 		
 		assertEquals(testObjects.size(), 1);
 		
-		//documentManager.delete(test);
+		documentManager.delete(test);
 		
-		//test = documentManager.find(TestObject.class, test.getId());
+		test = documentManager.find(TestObject.class, test.getId());
 		
-		//assertNull(test);
+		assertNull(test);
 	}
 
 	//@Test

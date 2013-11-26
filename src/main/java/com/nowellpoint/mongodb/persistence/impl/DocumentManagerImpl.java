@@ -247,8 +247,14 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	@Override
 	public void refresh(Object object) {
-		
+		object = find(object.getClass(), resolveId(object));		
 	}
+	
+	/**********************************************************************************************
+	 * 
+	 * private methods
+	 * 
+	 **********************************************************************************************/
 	
 	private void prePersist(Object object) {
 		Set<Method> methods = getAllMethods(object);

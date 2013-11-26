@@ -135,11 +135,11 @@ public class AnnotationResolver implements Serializable {
 	private static <T> String resolveCollectionName(Class<T> clazz) {	
 		String collectionName = null;
 		if (! clazz.isAnnotationPresent(Document.class)) {
-			throw new RuntimeException("Class must be annotated with the Document annotation");
+			throw new IllegalArgumentException("Class must be annotated with the Document annotation");
 		}
 		
 		if (! clazz.isAnnotationPresent(Collection.class)) {
-			throw new RuntimeException("Class must be annotated with the Collection annotation");
+			throw new IllegalArgumentException("Class must be annotated with the Collection annotation");
 		}
 		
 		Collection collection = (Collection) clazz.getAnnotation(Collection.class);
