@@ -26,7 +26,9 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.bson.types.ObjectId;
 
@@ -65,6 +67,12 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 */
 	
 	private static final long serialVersionUID = -7038813059024799681L;
+	
+	/**
+	 * 
+	 */
+	
+	private static final Logger LOG = Logger.getLogger(DocumentManagerImpl.class.getName());
 	
 	/**
 	 * 
@@ -136,7 +144,8 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 			}
 		}
 		postPersist(object);
-		return convertDocumentToObject(object, dbObject);
+		resolveId(object, dbObject.get(ID));
+		return (T) object;
 	}
 	
 	/**
@@ -177,6 +186,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 				.isEqual(id)
 				.getSingleResult();
 		} catch (PersistenceException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -302,8 +312,8 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		return methods;
 	}
 	
-	protected BasicDBObject convertObjectToDocument(Object object) {		
-		
+	protected BasicDBObject convertObjectToDocument(Object object) {	
+				
 		/**
 		 * create the MongoDB document
 		 */
@@ -314,7 +324,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		 * invoke superclass getters if the superclass is annotated with MappedSuperclass
 		 */
 		
-		if (object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
+		if (object.getClass().getSuperclass() != null && object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
 			invokeGetters(object.getClass().getSuperclass(), object, document);
 		}
 		
@@ -337,7 +347,7 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 		 * invoke setters on the superclass of object if the superclass is annotated with MappedSuperclass
 		 */
 		
-		if (object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
+		if (object.getClass().getSuperclass() != null && object.getClass().getSuperclass().isAnnotationPresent(MappedSuperclass.class)) {
 			invokeSetters(object.getClass().getSuperclass(), object, document);
 		}
 		
@@ -398,11 +408,18 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	private Object getFieldValue(Object object, Field field) {
 		try {
-		    Method method = object.getClass().getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {});	
-		    return method.invoke(object, new Object[] {});
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		    Method method = object.getClass().getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {});			    
+		    Object value = method.invoke(object, new Object[] {});
+            if (field.getType().isAssignableFrom(Locale.class)) {            	
+		    	value = String.valueOf(value);
+		    }
+            return value;
+		} catch (NoSuchMethodException e) {
+			LOG.info("Unable to find get method for mapped property field: " + field.getName());
+			return null;
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new PersistenceException(e);
-		}	
+		}
 	}
 	
 	private Object resolveId(Object object) {
@@ -414,6 +431,15 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 			}
 		}
 		return id;
+	}
+	
+	private void resolveId(Object object, Object id) {
+		Set<Field> fields = getAllFields(object);
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(Id.class)) {					
+				invokeSetter(object.getClass(), object, field, id);
+			}
+		}
 	}
 	
 	private void invokeGetters(Class clazz, Object object, DBObject document) {
@@ -432,11 +458,19 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	}
 	
 	private void invokeSetter(Class clazz, Object object, Field field, Object value) {
-		try {
-		    Method method = clazz.getMethod("set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {field.getType()});	
-		    method.invoke(object, new Object[] {value});
-		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new PersistenceException(e);
+		if (value != null) {
+			try {
+			    Method method = clazz.getMethod("set" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1), new Class[] {field.getType()});	
+			    if (field.getType().isAssignableFrom(Locale.class)) {
+			    	value = Locale.forLanguageTag(value.toString());
+			    }
+			    method.invoke(object, new Object[] {value});
+			} catch (NoSuchMethodException e) {
+				LOG.info("Unable to find set method for mapped property field: " + field.getName());
+				return;
+			} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new PersistenceException(e);
+			}
 		}
 	}
 	
@@ -448,16 +482,38 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 			} else if (field.isAnnotationPresent(Property.class)) {	
 				invokeSetter(clazz, object, field, document.get(getPropertyName(field)));
 			} else if (field.isAnnotationPresent(EmbedOne.class)) {
-				invokeSetter(clazz, object, field, document.get(getEmbedOneName(field)));
+				invokeSetter(clazz, object, field, convertEmbedOneToObject(field, document));
 			} else if (field.isAnnotationPresent(EmbedMany.class)) {
 				invokeSetter(clazz, object, field, document.get(getEmbedManyName(field)));
 			}
 		}
 	}
 	
+	private Object convertEmbedOneToObject(Field field, DBObject document) {
+		DBObject embed = (DBObject) document.get(getEmbedOneName(field));
+		Object object = null;
+		try {
+			object = field.getType().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new PersistenceException(e);
+		}
+		return convertDocumentToObject(object, embed);
+	}
+	
 	private BasicDBObject parseEmbedOne(Object object, Field field) throws PersistenceException {
-		validateEmbeddedDocument(field);
+		if (! field.getType().isAnnotationPresent(EmbeddedDocument.class)) {
+			throw new PersistenceException("Missing EmbeddedDocument annotation from " + field.getType().getClass().getName());
+		}
+		
 		Object embeddedDocument = getFieldValue(object, field);
+		if (embeddedDocument == null) {
+			try {
+				embeddedDocument = field.getType().newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new PersistenceException(e);
+			}
+		}
+		
 		return convertObjectToDocument(embeddedDocument);
 	}
 	
@@ -468,21 +524,27 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	 */
 	
 	private BasicDBList parseEmbedMany(Object object, Field field) {
-		validateEmbeddedDocument(field);
-		Object embeddedDocument = getFieldValue(object, field);		
-		List<?> list = (List<?>) embeddedDocument;
-		BasicDBList dbList = new BasicDBList();
-		for (Object embed : list) {
-			dbList.add(convertObjectToDocument(embed));
-		}		
-		return dbList;
-	}
-	
-	private void validateEmbeddedDocument(Field field) {
 		ParameterizedType type = (ParameterizedType) field.getGenericType();
 		Class<?> embeddedClass = (Class<?>) type.getActualTypeArguments()[0];
 		if (! embeddedClass.isAnnotationPresent(EmbeddedDocument.class)) {
 			throw new PersistenceException("Missing EmbeddedDocument annotation from " + embeddedClass.getClass().getName());
 		}
+		
+		Object embeddedDocument = getFieldValue(object, field);	
+		if (embeddedDocument == null) {
+			try {
+				embeddedDocument = field.getType().newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new PersistenceException(e);
+			}
+		}
+		
+		List<?> list = (List<?>) embeddedDocument;
+		BasicDBList dbList = new BasicDBList();
+		for (Object embed : list) {
+			dbList.add(convertObjectToDocument(embed));
+		}
+		
+		return dbList;
 	}
 }
