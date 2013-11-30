@@ -68,14 +68,6 @@ public interface DocumentManager {
 	<T> void delete(Object object);
 	
 	/**
-	 * delete
-	 * 
-	 * @param clazz
-	 */
-	
-	<T> void deleteAll(Class<T> clazz);
-	
-	/**
 	 * 
 	 * @param clazz
 	 * @param id

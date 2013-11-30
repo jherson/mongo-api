@@ -3,7 +3,6 @@ package com.nowellpoint.mongodb.persistence.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
@@ -23,7 +22,7 @@ public class QueryImpl<T> implements Query<T> {
 	 * 
 	 */
 	
-	private DocumentManagerImpl documentManager;
+	private DocumentManagerFactoryImpl documentManagerFactory;
 	
 	/**
 	 * 
@@ -38,15 +37,22 @@ public class QueryImpl<T> implements Query<T> {
 	private QueryBuilder queryBuilder;
 	
 	/**
+	 * 
+	 */
+	
+	private String collectionName;
+	
+	/**
 	 * constructor
 	 * 
 	 * @param documentManager
 	 * @param clazz
 	 */
 	
-	protected QueryImpl(DocumentManagerImpl documentManager, Class<T> clazz) {
-		this.documentManager = documentManager;	
+	protected QueryImpl(DocumentManagerFactoryImpl documentManagerFactory, Class<T> clazz, String collectionName) {
+		this.documentManagerFactory = documentManagerFactory;	
 		this.clazz = clazz;
+		this.collectionName = collectionName;
 		this.queryBuilder = QueryBuilder.start();
 	}
 	
@@ -86,7 +92,7 @@ public class QueryImpl<T> implements Query<T> {
 		 * execute the findOne query
 		 */
 		
-		DBObject document = getDBCollection(clazz).findOne(queryBuilder.get());
+		DBObject document = documentManagerFactory.getDB().getCollection(collectionName).findOne(queryBuilder.get());
 		
 		/**
 		 * if no records are found then throw exception
@@ -111,7 +117,7 @@ public class QueryImpl<T> implements Query<T> {
 		 * convert the document to an object 
 		 */
 		
-		return documentManager.convertDocumentToObject(object, document);
+		return documentManagerFactory.convertDocumentToObject(object, document);
 	}
 	
 	/**
@@ -127,7 +133,7 @@ public class QueryImpl<T> implements Query<T> {
 		 * execute the find query
 		 */
 		
-		DBCursor documents = getDBCollection(clazz).find(queryBuilder.get());
+		DBCursor documents = documentManagerFactory.getDB().getCollection(collectionName).find(queryBuilder.get());
 
 		/**
 		 * if no records are found then throw exception
@@ -145,7 +151,7 @@ public class QueryImpl<T> implements Query<T> {
 		try {
 			while (documents.hasNext()) {
 				Object object = clazz.newInstance();
-				queryResult.add((T) documentManager.convertDocumentToObject(object, documents.next()));
+				queryResult.add((T) documentManagerFactory.convertDocumentToObject(object, documents.next()));
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
         	throw new PersistenceException(e);	
@@ -158,14 +164,5 @@ public class QueryImpl<T> implements Query<T> {
 		 */
 		
 		return queryResult;
-	}
-	
-	/**	 
-	 * @param clazz
-	 * @return
-	 */
-	
-	private DBCollection getDBCollection(Class<T> clazz) {
-		return documentManager.getDB().getCollection(AnnotationResolver.resolveCollection(clazz));
 	}
 }
