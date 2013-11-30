@@ -2,11 +2,11 @@ package com.nowellpoint.mongodb.persistence.test;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 import java.util.Locale;
 
-import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -79,7 +79,7 @@ public class MongoApiTest {
 		session.setToken(token);
 		session.setIdentity(identity);
 		
-		session = documentManager.insert(Session.class, session);
+		documentManager.persist(session);
 		
 		assertNotNull(session.getId());
 		
@@ -90,17 +90,28 @@ public class MongoApiTest {
 		assertNotNull(session);
 		assertNotNull(session.getToken());
 		assertNotNull(session.getIdentity().getLocale());
-	}
-	
-	
-	public void testQuerySession() {
-		Assume.assumeTrue(documentManagerFactory.isOpen());
+		assertNull(session.getIdentity().getEmail());
 		
-		Session session = documentManager.find(Session.class, new ObjectId("52976ad3ef86b542306385fc"));
+		documentManager.refresh(session);
 		
 		assertNotNull(session);
+		assertNotNull(session.getToken());
+		assertNotNull(session.getIdentity().getLocale());
 		
-		System.out.println(session.getIdentity().getDisplayName());
+		session.getIdentity().setEmail("john.d.herson@gmail.com");
+		
+		session = documentManager.merge(session);
+		
+		session = documentManager.find(Session.class, session.getId());
+		
+		assertNotNull(session);
+		assertNotNull(session.getIdentity().getEmail());
+		
+		documentManager.remove(session);
+		
+		session = documentManager.find(Session.class, session.getId());
+		
+		assertNull(session);
 	}
 	
 	@AfterClass

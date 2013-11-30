@@ -20,8 +20,6 @@ package com.nowellpoint.mongodb.persistence.impl;
 
 import java.io.Serializable;
 
-import org.bson.types.ObjectId;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -32,7 +30,6 @@ import com.nowellpoint.mongodb.persistence.DocumentManager;
 import com.nowellpoint.mongodb.persistence.DocumentManagerFactory;
 import com.nowellpoint.mongodb.persistence.MongoExceptionCode;
 import com.nowellpoint.mongodb.persistence.Query;
-import com.nowellpoint.mongodb.persistence.annotation.Collection;
 import com.nowellpoint.mongodb.persistence.exception.DocumentExistsException;
 import com.nowellpoint.mongodb.persistence.exception.PersistenceException;
 
@@ -56,39 +53,22 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 	
 	private DocumentManagerFactoryImpl doumentManagerFactory;
 	
-	/**
-	 * constructor
-	 * @param DocumentManagerFactory
-	 */
 	
 	protected DocumentManagerImpl(DocumentManagerFactoryImpl documentManagerFactory) {
 		this.doumentManagerFactory = documentManagerFactory;
 	}
-	
-	/**
-	 * 
-	 * @return
-	 */
-	
+
 	@Override
 	public DocumentManagerFactory getDocumentManagerFactory() {
 		return doumentManagerFactory;
 	}
 	
-	/**
-	 * inserts an object into a collection
-	 * 
-	 * @param clazz
-	 * @param object to be inserted
-	 * @return T
-	 */
-	
 	@Override
-	public <T> T insert(Class<T> clazz, Object object) {
-		doumentManagerFactory.prePersist(object);
-		String collectionName = doumentManagerFactory.resolveDocumentName(object.getClass());	
+	public void persist(Object document) {
+		doumentManagerFactory.prePersist(document);
+		String collectionName = doumentManagerFactory.resolveDocumentName(document.getClass());	
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = doumentManagerFactory.convertObjectToDocument(object);
+		DBObject dbObject = doumentManagerFactory.convertObjectToDocument(document);
 		try {
 			collection.insert(dbObject);
 		} catch (MongoException e) {
@@ -96,120 +76,61 @@ public class DocumentManagerImpl implements DocumentManager, Serializable {
 				throw new DocumentExistsException(e.getMessage());
 			}
 		}		
-		doumentManagerFactory.resolveId(object, dbObject.get(DocumentManagerFactoryImpl.ID));
-		doumentManagerFactory.postPersist(object);
-		return (T) object;
+		doumentManagerFactory.resolveId(document, dbObject.get(DocumentManagerFactoryImpl.ID));
+		doumentManagerFactory.postPersist(document);
 	}
 	
-	/**
-	 * updates the object in the collection
-	 * 
-	 * @param clazz
-	 * @param object to be updated
-	 * @return the updated object
-	 */
-	
 	@Override
-	public <T> T update(Class<T> clazz, Object object) {		
-		doumentManagerFactory.prePersist(object);
-		String collectionName = doumentManagerFactory.resolveDocumentName(object.getClass());	
+	public <T> T merge(T document) {		
+		doumentManagerFactory.prePersist(document);
+		String collectionName = doumentManagerFactory.resolveDocumentName(document.getClass());	
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = doumentManagerFactory.convertObjectToDocument(object);
-		WriteResult result = collection.save(dbObject);
+		Object documentId = doumentManagerFactory.resolveId(document);
+		DBObject dbObject = doumentManagerFactory.convertObjectToDocument(document);				
+		DBObject query = new BasicDBObject(DocumentManagerFactoryImpl.ID, documentId);
+		WriteResult result = collection.update(query, dbObject);
 		if (result.getError() != null) {
 			throw new MongoException(result.getLastError());
 		}
-		doumentManagerFactory.postPersist(object);
-		return doumentManagerFactory.convertDocumentToObject(clazz, dbObject);
+		doumentManagerFactory.postPersist(document);
+		return document;
 	}
 	
-	/**
-	 * 
-	 * @param <T>
-	 * @param clazz
-	 * @param id the Object of the object to query
-	 * @return object found based on objectId
-	 */
-	
 	@Override
-	public <T> T find(Class<T> clazz, Object id) {
+	public <T> T find(Class<T> documentClass, Object documentId) {
 		try {
-			return (T) createQuery(clazz)
+			return (T) createQuery(documentClass)
 				.field(DocumentManagerFactoryImpl.ID)
-				.isEqual(id)
+				.isEqual(documentId)
 				.getSingleResult();
 		} catch (PersistenceException e) {
 			return null;
 		}
 	}
 	
-	/**
-	 * delete a document from a collection
-	 * 
-	 * @param clazz
-	 * @param object to delete
-	 */
-	
 	@Override
-	public <T> void delete(Class<T> clazz, Object object) {		
-		String collectionName = doumentManagerFactory.resolveDocumentName(object.getClass());
+	public void remove(Object document) {
+		String collectionName = doumentManagerFactory.resolveDocumentName(document.getClass());
 		DBCollection collection = getDB().getCollection(collectionName);
-		DBObject dbObject = doumentManagerFactory.convertObjectToDocument(object);	
-		WriteResult wr = collection.remove(new BasicDBObject(DocumentManagerFactoryImpl.ID, new ObjectId(dbObject.get(DocumentManagerFactoryImpl.ID).toString())));
+		Object documentId = doumentManagerFactory.resolveId(document);
+		WriteResult wr = collection.remove(new BasicDBObject(DocumentManagerFactoryImpl.ID, documentId));
 		if (wr.getError() != null) {
 			throw new MongoException(wr.getLastError());
 		}
 	}
 	
-	/**
-	 * delete a document from a collection
-	 * 
-	 * @param object
-	 */
+	@Override
+	public <T> Query createQuery(Class<T> clazz) {
+		return new QueryImpl(doumentManagerFactory, clazz, doumentManagerFactory.resolveDocumentName(clazz));
+	}
 	
 	@Override
-	public <T> void delete(Object object) {
-		String collectionName = doumentManagerFactory.resolveDocumentName(object.getClass());
-		DBCollection collection = getDB().getCollection(collectionName);
-		Object id = doumentManagerFactory.resolveId(object);
-		WriteResult wr = collection.remove(new BasicDBObject(DocumentManagerFactoryImpl.ID, id));
-		if (wr.getError() != null) {
-			throw new MongoException(wr.getLastError());
-		}
+	public void refresh(Object document) {
+		document = find(document.getClass(), doumentManagerFactory.resolveId(document));		
 	}
 	
 	/**
-	 * createQuery
-	 * 
-	 * @param clazz
-	 * @return Query
-	 */
-	
-	@Override
-	public <T> Query createQuery(Class<T> clazz) {	
-		String collectionName = null;
-		Collection collection = (Collection) clazz.getAnnotation(Collection.class);
-		if (collection.name().trim().length() > 0) {
-			collectionName = collection.name();
-		} else {
-			collectionName = clazz.getSimpleName();
-		}
-		
-		return new QueryImpl(doumentManagerFactory, clazz, collectionName);
-	}
-	
-	/**
-	 * 
-	 */
-	
-	@Override
-	public void refresh(Object object) {
-		object = find(object.getClass(), doumentManagerFactory.resolveId(object));		
-	}
-	
-	/**
-	 * getDB
-	 * 
+	 * getDB()
 	 * @return DB
 	 */
 	

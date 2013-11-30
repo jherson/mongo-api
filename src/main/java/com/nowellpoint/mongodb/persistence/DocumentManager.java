@@ -27,68 +27,54 @@ public interface DocumentManager {
 	
 	/**
 	 * getDocumentManagerFactory
-	 * @return
+	 * @return DocumentManagerFactory
 	 */
 	
 	DocumentManagerFactory getDocumentManagerFactory();
 	
 	/**
-	 * insert
-	 * @param clazz
-	 * @param object
+	 * persist
+	 * @param document
+	 */
+	
+	void persist(Object document);
+	
+	/**
+	 * merge
+	 * @param document
 	 * @return T
 	 */
 	
-	<T> T insert(Class<T> clazz, Object object);
+	<T> T merge(T document);
 	
 	/**
-	 * update
-	 * @param clazz
-	 * @param object
+	 * remove
+	 * @param document
+	 */
+	
+	void remove(Object document);
+	
+	/**
+	 * find
+	 * @param documentClass
+	 * @param documentId
 	 * @return T
 	 */
 	
-	<T> T update(Class<T> clazz, Object object);
-	
-	/**
-	 * delete
-	 * 
-	 * @param clazz
-	 * @param object
-	 */
-	
-	<T> void delete(Class<T> clazz, Object object);
-
-	/**
-	 * delete
-	 * 
-	 * @param object
-	 */
-	
-	<T> void delete(Object object);
-	
-	/**
-	 * 
-	 * @param clazz
-	 * @param id
-	 * @return
-	 */
-	
-	<T> T find(Class<T> clazz, Object id);
+	<T> T find(Class<T> documentClass, Object documentId);
 	
 	/**
 	 * createQuery
-	 * 
 	 * @param clazz
-	 * @return Query
+	 * @return Query<T>
 	 */
 	
 	<T> Query<T> createQuery(Class<T> clazz);
 	
 	/**
-	 * 
-	 * @param object
+	 * refresh
+	 * @param document
 	 */
 	
-	void refresh(Object object);
+	void refresh(Object document);
 }
